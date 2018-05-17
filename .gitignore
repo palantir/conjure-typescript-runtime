@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
+/lib
+/node_modules
+/coverage
+
+# Intellij
+.idea
+*.iml

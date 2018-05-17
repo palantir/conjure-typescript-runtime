@@ -1,0 +1,35 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8.10.0
+    steps:
+      - checkout
+      - run: node --version && yarn --version
+      - restore_cache:
+          keys:
+            - node-modules-{{ checksum "yarn.lock" }}
+            - node-modules-
+      - run: yarn install --pure-lockfile
+      - save_cache:
+          key: node-modules-{{ checksum "yarn.lock" }}
+          paths:
+            - /root/project/node_modules
+      - run: yarn build
+      - run: yarn verify
+      - store_test_results:
+          path: /tmp/reports
+#      - deploy:
+#          command: |
+#            if echo "${CIRCLE_TAG}" | grep -Eq '[0-9]+(\.[0-9]+)+(-[a-zA-Z]+[0-9]*)*'; then
+#              ./scripts/circle-publish-npm
+#            fi
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
