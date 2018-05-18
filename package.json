@@ -1,6 +1,6 @@
 {
-  "name": "conjure-ts-client",
-  "version": "2.0.1",
+  "name": "test-publish-cj-client",
+  "version": "0.1.0",
   "description": "An HTTP bridge library for use in front end applications and generated conjure code",
   "sideEffects": false,
   "main": "lib/index.js",
