@@ -7,13 +7,13 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "build": "npm-run-all clean compile",
+    "circle-publish": "./scripts/circle-publish-npm",
     "clean": "rm -rf lib/*",
     "compile": "tsc -p ./src",
     "lint": "tslint 'src/**/*.ts*' -t codeFrame",
     "lint-fix": "yarn lint --fix",
     "test": "jest",
-    "verify": "npm-run-all -p test lint",
-    "circle-publish": "./scripts/circle-publish-npm"
+    "verify": "npm-run-all -p test lint"
   },
   "dependencies": {
     "uuidjs": "^4.0.3"
