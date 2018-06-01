@@ -12,7 +12,8 @@
     "lint": "tslint 'src/**/*.ts*' -t codeFrame",
     "lint-fix": "yarn lint --fix",
     "test": "jest",
-    "verify": "npm-run-all -p test lint"
+    "verify": "npm-run-all -p test lint",
+    "circle-publish": "./scripts/circle-publish-npm"
   },
   "dependencies": {
     "uuidjs": "^4.0.3"
