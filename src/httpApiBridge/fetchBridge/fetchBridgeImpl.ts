@@ -160,7 +160,7 @@ export class FetchBridgeImpl implements IHttpApiBridge {
         const urlParameterRegex = /\{[^\}]+\}/;
         let path = this.normalizeWithNoLeadingSlash(parameters.endpointPath);
         for (let pathArgument of parameters.pathArguments) {
-            pathArgument = pathArgument || "";
+            pathArgument = pathArgument == null ? "" : pathArgument
             path = path.replace(urlParameterRegex, encodeURIComponent(pathArgument));
         }
         return path;
