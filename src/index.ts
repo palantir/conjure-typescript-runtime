@@ -19,4 +19,3 @@ export { FetchBridgeImpl as DefaultHttpApiBridge } from "./httpApiBridge/fetchBr
 export * from "./httpApiBridge/fetchBridge/retryingFetch";
 export * from "./httpApiBridge/error";
 export * from "./httpApiBridge/httpApiBridge";
-export * from "./uuid/uuid";
