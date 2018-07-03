@@ -16,6 +16,7 @@
  */
 
 export { FetchBridgeImpl as DefaultHttpApiBridge } from "./httpApiBridge/fetchBridge/fetchBridgeImpl";
+export * from "./httpApiBridge/fetchBridge/fetchBridgeImpl";
 export * from "./httpApiBridge/fetchBridge/retryingFetch";
 export * from "./httpApiBridge/error";
 export * from "./httpApiBridge/httpApiBridge";
