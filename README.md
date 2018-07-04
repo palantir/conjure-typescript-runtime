@@ -13,6 +13,7 @@ __Browser compatibility__: This library uses fetch so you should ensure that you
 
 ```typescript
 import { DefaultHttpApiBridge, MediaType } from "conjure-client";
+import { SomeService } from "some-conjure-api";
 
 const bridge = new DefaultHttpApiBridge({
     baseUrl: "https://some.base.url.com",
@@ -22,24 +23,19 @@ const bridge = new DefaultHttpApiBridge({
     }
 })
 
-bridge.callEndpoint({
-    method: "GET",
-    endpointPath: "getResult",
-    requestMediaType: MediaType.APPLICATION_JSON,
-    responseMediaType: MediaType.APPLICATION_JSON,
-    pathArguments: [],
-    queryArguments: {},
-}).then(function (response) {
-    // handle success
-    console.log(response);
-})
-.catch(function (error) {
-    // handle error
-    console.log(error);
-})
-.then(function () {
-    // always executed
-});
+const service = new SomeService(bridge);
+service.getSomeResult()
+    .then(function (response) {
+        // handle success
+        console.log(response);
+    })
+    .catch(function (error) {
+        // handle error
+        console.log(error);
+    })
+    .then(function () {
+        // always executed
+    });
 ```
 
 
