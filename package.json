@@ -6,7 +6,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "build": "npm-run-all clean lint compile",
+    "build": "npm-run-all clean lint compile test",
     "circle-publish": "./scripts/circle-publish-npm",
     "clean": "rm -rf lib/*",
     "compile": "tsc -p ./src",
