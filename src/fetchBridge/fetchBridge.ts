@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ConjureError, ConjureErrorType } from "../error";
+import { ConjureError, ConjureErrorType } from "../errors";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
 
 export interface IFetchBody {
@@ -53,7 +53,7 @@ export interface IFetchBridgeParams {
     fetch?: FetchFunction;
 }
 
-export class FetchBridgeImpl implements IHttpApiBridge {
+export class FetchBridge implements IHttpApiBridge {
     private static ACCEPT_HEADER = "accept";
 
     private readonly baseUrl: string;
@@ -100,7 +100,7 @@ export class FetchBridgeImpl implements IHttpApiBridge {
         if (responseMediaType) {
             // If an endpoint can return multiple content types, make sure it returns the type that we're expecting
             // instead of the default `*/*
-            (fetchRequestInit.headers as any)[FetchBridgeImpl.ACCEPT_HEADER] = responseMediaType;
+            (fetchRequestInit.headers as any)[FetchBridge.ACCEPT_HEADER] = responseMediaType;
         }
 
         const fetchFunction = this.fetch || fetch;

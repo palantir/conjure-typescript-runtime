@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { IHttpApiBridge, MediaType } from "../../..";
+import { IHttpApiBridge, MediaType } from "../../httpApiBridge";
 
 export class ConjureService {
     constructor(private bridge: IHttpApiBridge) {}

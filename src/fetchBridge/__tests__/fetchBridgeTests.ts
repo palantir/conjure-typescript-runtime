@@ -16,10 +16,9 @@
  */
 
 import * as fetchMock from "fetch-mock";
-
-import { ConjureError, ConjureErrorType } from "../../error";
+import { ConjureError, ConjureErrorType } from "../../errors";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../../httpApiBridge";
-import { FetchBridgeImpl, IUserAgent } from "../fetchBridgeImpl";
+import { FetchBridge, IUserAgent } from "../fetchBridge";
 
 const baseUrl = "https://host.domain/path";
 const token = "TOKEN";
@@ -55,7 +54,7 @@ describe("FetchBridgeImpl", () => {
     }
 
     beforeEach(() => {
-        bridge = new FetchBridgeImpl({ baseUrl, token, fetch: undefined, userAgent });
+        bridge = new FetchBridge({ baseUrl, token, fetch: undefined, userAgent });
     });
 
     afterEach(() => {

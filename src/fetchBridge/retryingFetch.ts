@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { FetchFunction, IFetchResponse } from "./fetchBridgeImpl";
+import { FetchFunction, IFetchResponse } from "./fetchBridge";
 
 /**
  * The maximum value we accept in a Retry-After header.
