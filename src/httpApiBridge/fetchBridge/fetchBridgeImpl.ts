@@ -48,7 +48,7 @@ export interface IFetchBridgeParams {
      * All network requests will add this userAgent as a header param called 'Fetch-User-Agent'.
      * This will be logged in receiving service's request logs as params.User-Agent
      */
-    userAgent: IUserAgent;
+    userAgent?: IUserAgent;
     token?: string;
     fetch?: FetchFunction;
 }
