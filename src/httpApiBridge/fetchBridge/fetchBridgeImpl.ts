@@ -37,11 +37,6 @@ export interface IUserAgent {
     productVersion: string;
 }
 
-function formatUserAgent(userAgent: IUserAgent): string {
-    const { productName, productVersion } = userAgent;
-    return `${productName}/${productVersion}`;
-}
-
 export interface IFetchBridgeParams {
     baseUrl: string;
     /**
@@ -58,8 +53,8 @@ export class FetchBridgeImpl implements IHttpApiBridge {
 
     private readonly baseUrl: string;
     private readonly token: string | undefined;
-    private readonly fetch: FetchFunction | undefined;
-    private readonly userAgent: IUserAgent;
+    private readonly fetch?: FetchFunction;
+    private readonly userAgent?: IUserAgent;
 
     constructor(params: IFetchBridgeParams) {
         this.baseUrl = params.baseUrl;
@@ -71,7 +66,10 @@ export class FetchBridgeImpl implements IHttpApiBridge {
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
         const url = `${this.baseUrl}/${this.buildPath(params)}${this.buildQueryString(params)}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
-        headers["Fetch-User-Agent"] = formatUserAgent(this.userAgent);
+
+        if (this.userAgent != null) {
+            headers["Fetch-User-Agent"] = this.formatUserAgent(this.userAgent);
+        }
 
         // don't send headers where values are undefined or null
         Object.keys(headers).forEach(key => {
@@ -204,5 +202,10 @@ export class FetchBridgeImpl implements IHttpApiBridge {
             input = input.slice(1);
         }
         return input;
+    }
+
+    private formatUserAgent(userAgent: IUserAgent): string {
+        const { productName, productVersion } = userAgent;
+        return `${productName}/${productVersion}`;
     }
 }
