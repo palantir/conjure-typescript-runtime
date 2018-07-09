@@ -259,6 +259,9 @@ describe("FetchBridgeImpl", () => {
             endpointPath: "a",
             headers: {
                 "Cache-Control": "max-age=60",
+                "boolean-header": true,
+                "null-header": null,
+                "number-header": 1,
             },
             method: "GET",
             pathArguments: [],
@@ -270,55 +273,9 @@ describe("FetchBridgeImpl", () => {
             contentType: "application/json",
             headers: {
                 "Cache-Control": "max-age=60",
+                "boolean-header": "true",
+                "number-header": "1",
             },
-            method: "GET",
-            responseMediaType: request.responseMediaType,
-        });
-        const expectedFetchResponse = createFetchResponse(mockedResponseData, 200);
-        mockFetch(expectedUrl, expectedFetchRequest, expectedFetchResponse);
-        await expect(bridge.callEndpoint(request)).resolves.toEqual(mockedResponseData);
-    });
-
-    it("passes undefined headers", async () => {
-        const request: IHttpEndpointOptions = {
-            endpointName: "a",
-            endpointPath: "a",
-            headers: {
-                "Cache-Control": (undefined as any) as string,
-            },
-            method: "GET",
-            pathArguments: [],
-            queryArguments: {},
-            responseMediaType: MediaType.APPLICATION_JSON,
-        };
-        const expectedUrl = `${baseUrl}/a`;
-        const expectedFetchRequest = createFetchRequest({
-            contentType: MediaType.APPLICATION_JSON,
-            headers: {},
-            method: "GET",
-            responseMediaType: request.responseMediaType,
-        });
-        const expectedFetchResponse = createFetchResponse(mockedResponseData, 200);
-        mockFetch(expectedUrl, expectedFetchRequest, expectedFetchResponse);
-        await expect(bridge.callEndpoint(request)).resolves.toEqual(mockedResponseData);
-    });
-
-    it("passes null headers", async () => {
-        const request: IHttpEndpointOptions = {
-            endpointName: "a",
-            endpointPath: "a",
-            headers: {
-                "Cache-Control": (null as any) as string,
-            },
-            method: "GET",
-            pathArguments: [],
-            queryArguments: {},
-            responseMediaType: MediaType.APPLICATION_JSON,
-        };
-        const expectedUrl = `${baseUrl}/a`;
-        const expectedFetchRequest = createFetchRequest({
-            contentType: "application/json",
-            headers: {},
             method: "GET",
             responseMediaType: request.responseMediaType,
         });
