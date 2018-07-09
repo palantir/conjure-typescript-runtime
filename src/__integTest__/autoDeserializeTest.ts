@@ -56,13 +56,17 @@ describe("Auto deserialize", () => {
             try {
                 response = await (testService as any)[endpointName](index);
             } catch (e) {
-                if (shouldPass) {
-                    assert.fail();
+                if (!shouldPass) {
+                    return;
                 }
+                assert.fail("error");
             }
-            if (shouldPass) {
-                await confirmService.confirm(endpointName, index, response);
+            if (!shouldPass) {
+                // TODO(forozco): perform any type of validation on client side
+                // assert.fail(response, value);
+                return;
             }
+            await confirmService.confirm(endpointName, index, response);
         };
     }
 });
