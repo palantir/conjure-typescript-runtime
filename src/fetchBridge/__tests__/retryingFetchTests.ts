@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { IFetchResponse } from "../fetchBridgeImpl";
+import { IFetchResponse } from "../fetchBridge";
 import { exponentialBackoff, RetryingFetch } from "../retryingFetch";
 
 const baseUrl = "https://host.domain/path";
