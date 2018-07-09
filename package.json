@@ -10,10 +10,11 @@
     "circle-publish": "./scripts/circle-publish-npm",
     "clean": "rm -rf lib/*",
     "compile": "tsc -p ./src",
+    "downloadConjureTypeScript": "./scripts/download-conjure-typescript.sh",
     "generateSpecBindings": "./scripts/generate-test-bindings.sh",
     "lint": "tslint 'src/**/*.ts*' --project ./src/tsconfig.json",
     "lint-fix": "lint --fix",
-    "test": "npm-run-all generateSpecBindings test:unit test:integration",
+    "test": "npm-run-all downloadConjureTypeScript generateSpecBindings test:unit test:integration",
     "test:integration": "karma start --single-run --browsers ChromeHeadless karma.conf.js",
     "test:unit": "jest --config ./jest.config.js --rootDir ./",
     "verify": "npm-run-all -p test lint"

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 VERSION=3.0.0
 ARTIFACT_NAME="conjure-typescript-${VERSION}"
 DOWNLOAD_OUTPUT="build/downloads/conjure-typescript.tgz"
