@@ -72,17 +72,19 @@ export class FetchBridge implements IHttpApiBridge {
         const url = `${this.baseUrl}/${this.buildPath(params)}${this.buildQueryString(params)}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
         headers["Fetch-User-Agent"] = formatUserAgent(this.userAgent);
+        const stringifiedHeaders: { [headerName: string]: string } = {};
 
-        // don't send headers where values are undefined or null
+        // Only send present headers as strings
         Object.keys(headers).forEach(key => {
-            if (headers[key] == null) {
-                delete headers[key];
+            const headerValue = headers[key];
+            if (headerValue != null) {
+                stringifiedHeaders[key] = headerValue.toString();
             }
         });
 
         const fetchRequestInit: RequestInit = {
             credentials: "same-origin",
-            headers,
+            headers: stringifiedHeaders,
             method,
         };
 
