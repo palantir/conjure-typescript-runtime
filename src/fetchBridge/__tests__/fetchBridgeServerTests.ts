@@ -18,8 +18,8 @@
 import * as express from "express";
 import * as http from "http";
 import * as nodeFetch from "node-fetch-polyfill";
-import { IHttpApiBridge } from "../../..";
-import { FetchBridgeImpl, IUserAgent } from "../fetchBridgeImpl";
+import { IHttpApiBridge } from "../../httpApiBridge";
+import { FetchBridge, IUserAgent } from "../fetchBridge";
 import { ConjureService } from "./conjureService";
 
 const token = "TOKEN";
@@ -34,7 +34,7 @@ describe("FetchBridgeImplServer", () => {
         const port = 9000;
         const baseUrl = `http://${host}:${port}`;
         const userAgent: IUserAgent = { productName: "foo", productVersion: "1.2.3" };
-        bridge = new FetchBridgeImpl({ baseUrl, token, fetch: nodeFetch, userAgent });
+        bridge = new FetchBridge({ baseUrl, token, fetch: nodeFetch, userAgent });
 
         app = express();
         server = http.createServer(app);
