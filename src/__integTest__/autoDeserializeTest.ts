@@ -16,7 +16,7 @@
  */
 
 import { assert } from "chai";
-import { FetchBridgeImpl } from "../httpApiBridge/fetchBridge/fetchBridgeImpl";
+import { FetchBridge } from "../fetchBridge";
 import { AutoDeserializeService, ITestCases } from "./__generated__";
 import { AutoDeserializeConfirmService } from "./__generated__/conjure-compliance";
 // HACKHACK to load test-cases
@@ -24,10 +24,10 @@ import { AutoDeserializeConfirmService } from "./__generated__/conjure-complianc
 const testCasesFile: ITestCases = require("../../resources/test-cases.json");
 
 describe("Array", () => {
-    const bridge = new FetchBridgeImpl({
+    const bridge = new FetchBridge({
         baseUrl: "http://localhost:8000",
         userAgent: {
-            productName: "conjure-typescript",
+            productName: "conjure-typescript-client",
             productVersion: "0.0.0",
         },
         fetch: (url: string | Request, init?: RequestInit) => {

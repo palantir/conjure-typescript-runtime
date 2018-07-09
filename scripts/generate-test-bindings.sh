@@ -14,4 +14,4 @@ $CONJURE_TYPESCRIPT generate resources/api.json "$TEST_DIR" --packageName genera
 rm ${TEST_DIR}/*.json "$TEST_DIR/.npmignore"
 
 # Replace replaces references to point to internal package
-find src/__integTest__/__generated__/  -name "*.ts" -type f -exec sed -i '' 's|conjure-client|../../../|g' {} \;
+find src/__integTest__/__generated__/  -name "*.ts" -type f -exec sed -i '' 's|conjure-client|../../../httpApiBridge|g' {} \;
