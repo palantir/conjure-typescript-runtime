@@ -26,7 +26,7 @@ export interface IHttpEndpointOptions {
     endpointName?: string;
 
     /** HTTP headers. */
-    headers?: { [header: string]: string };
+    headers?: { [header: string]: string | number | boolean | undefined | null };
 
     /** HTTP method. */
     method: string;
