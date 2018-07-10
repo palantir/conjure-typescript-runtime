@@ -15,5 +15,10 @@ $CONJURE_TYPESCRIPT generate resources/compliance-api.json "$TEST_DIR" --package
 # Clean up package cruft
 rm ${TEST_DIR}/*.json "$TEST_DIR/.npmignore"
 
+REPLACE_STRING="s|conjure-client|../../../httpApiBridge|g"
+
 # Replace replaces references to point to internal package
-find src/__integTest__/__generated__/  -name "*.ts" -type f -exec sed -i '' 's|conjure-client|../../../httpApiBridge|g' {} \;
+case $(uname -s) in
+    Linux*) find src/__integTest__/__generated__/  -name "*.ts" -type f -exec sed -i ${REPLACE_STRING} {} \;;;
+    Darwin*) find src/__integTest__/__generated__/  -name "*.ts" -type f -exec sed -i '' ${REPLACE_STRING} {} \;;
+esac
