@@ -11,3 +11,4 @@ Thumbs.db
 *.iml
 
 build
+__generated__
