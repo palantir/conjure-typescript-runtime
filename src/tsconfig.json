@@ -1,16 +1,26 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "lib": ["dom", "es5", "es6"],
+    "experimentalDecorators": true,
+    "jsx": "react",
+    "lib": [
+      "dom",
+      "es6",
+      "es5"
+    ],
     "module": "commonjs",
     "moduleResolution": "node",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "outDir": "../lib",
     "pretty": true,
     "removeComments": false,
+    "sourceMap": true,
     "strict": true,
     "stripInternal": true,
-    "target": "es5"
-  }
+    "target": "es5",
+    "outDir": "../lib"
+  },
+  "exclude": [
+    "**/__integTest__/*"
+  ]
 }

@@ -21,7 +21,7 @@
  */
 module.exports = {
     bail: true,
-    collectCoverage: true,
+    collectCoverage: false,
     collectCoverageFrom: [
         "src/**/*.{ts,tsx}",
         "!**/*.d.ts",

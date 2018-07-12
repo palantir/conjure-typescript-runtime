@@ -9,3 +9,6 @@ Thumbs.db
 # Intellij
 .idea
 *.iml
+
+build
+__generated__
