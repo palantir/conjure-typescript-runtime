@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 CONJURE_TYPESCRIPT=build/conjure-typescript/bin/conjure-typescript
 TEST_DIR=src/__integTest__/__generated__
@@ -19,6 +19,6 @@ REPLACE_STRING="s|conjure-client|../../../httpApiBridge|g"
 
 # Replace replaces references to point to internal package
 case $(uname -s) in
-    Linux*) find src/__integTest__/__generated__/  -name "*.ts" -type f -exec sed -i.bak "${REPLACE_STRING}" {} \;;;
-    Darwin*) find src/__integTest__/__generated__/  -name "*.ts" -type f -exec sed -i.bak "${REPLACE_STRING}" {} \;;
+    Linux*) find src/__integTest__/__generated__/  -name "*.ts" -type f -exec sed -i "${REPLACE_STRING}" {} \;;;
+    Darwin*) find src/__integTest__/__generated__/  -name "*.ts" -type f -exec sed -i "" "${REPLACE_STRING}" {} \;;
 esac
