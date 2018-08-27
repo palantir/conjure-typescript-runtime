@@ -43,7 +43,7 @@ function formatUserAgent(userAgent: IUserAgent): string {
 }
 
 export interface IFetchBridgeParams {
-    baseUrl: string;
+    baseUrl: () => string | string;
     /**
      * All network requests will add this userAgent as a header param called 'Fetch-User-Agent'.
      * This will be logged in receiving service's request logs as params.User-Agent
@@ -56,7 +56,7 @@ export interface IFetchBridgeParams {
 export class FetchBridge implements IHttpApiBridge {
     private static ACCEPT_HEADER = "accept";
 
-    private readonly baseUrl: string;
+    private readonly baseUrl: () => string | string;
     private readonly token: string | undefined;
     private readonly fetch: FetchFunction | undefined;
     private readonly userAgent: IUserAgent;
@@ -69,7 +69,7 @@ export class FetchBridge implements IHttpApiBridge {
     }
 
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
-        const url = `${this.baseUrl}/${this.buildPath(params)}${this.buildQueryString(params)}`;
+        const url = `${this.getBaseUrl()}/${this.buildPath(params)}${this.buildQueryString(params)}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
         headers["Fetch-User-Agent"] = formatUserAgent(this.userAgent);
         const stringifiedHeaders: { [headerName: string]: string } = {};
@@ -152,6 +152,13 @@ export class FetchBridge implements IHttpApiBridge {
                 throw new ConjureError(ConjureErrorType.Other, error);
             }
         }
+    }
+
+    private getBaseUrl(): string {
+        if (typeof this.baseUrl === "string") {
+            return this.baseUrl;
+        }
+        return this.baseUrl();
     }
 
     private appendQueryParameter(query: string[], key: string, value: any) {
