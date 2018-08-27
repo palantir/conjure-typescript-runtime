@@ -42,8 +42,10 @@ function formatUserAgent(userAgent: IUserAgent): string {
     return `${productName}/${productVersion}`;
 }
 
+export type Supplier<T> = () => T;
+
 export interface IFetchBridgeParams {
-    baseUrl: () => string | string;
+    baseUrl: string | Supplier<string>;
     /**
      * All network requests will add this userAgent as a header param called 'Fetch-User-Agent'.
      * This will be logged in receiving service's request logs as params.User-Agent
@@ -56,7 +58,7 @@ export interface IFetchBridgeParams {
 export class FetchBridge implements IHttpApiBridge {
     private static ACCEPT_HEADER = "accept";
 
-    private readonly baseUrl: () => string | string;
+    private readonly baseUrl: string | Supplier<string>;
     private readonly token: string | undefined;
     private readonly fetch: FetchFunction | undefined;
     private readonly userAgent: IUserAgent;
