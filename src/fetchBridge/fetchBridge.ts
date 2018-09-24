@@ -42,8 +42,10 @@ function formatUserAgent(userAgent: IUserAgent): string {
     return `${productName}/${productVersion}`;
 }
 
+export type Supplier<T> = () => T;
+
 export interface IFetchBridgeParams {
-    baseUrl: string;
+    baseUrl: string | Supplier<string>;
     /**
      * All network requests will add this userAgent as a header param called 'Fetch-User-Agent'.
      * This will be logged in receiving service's request logs as params.User-Agent
@@ -56,20 +58,20 @@ export interface IFetchBridgeParams {
 export class FetchBridge implements IHttpApiBridge {
     private static ACCEPT_HEADER = "accept";
 
-    private readonly baseUrl: string;
+    private readonly getBaseUrl: Supplier<string>;
     private readonly token: string | undefined;
     private readonly fetch: FetchFunction | undefined;
     private readonly userAgent: IUserAgent;
 
     constructor(params: IFetchBridgeParams) {
-        this.baseUrl = params.baseUrl;
+        this.getBaseUrl = typeof params.baseUrl === "string" ? () => params.baseUrl as string : params.baseUrl;
         this.token = params.token;
         this.fetch = params.fetch;
         this.userAgent = params.userAgent;
     }
 
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
-        const url = `${this.baseUrl}/${this.buildPath(params)}${this.buildQueryString(params)}`;
+        const url = `${this.getBaseUrl()}/${this.buildPath(params)}${this.buildQueryString(params)}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
         headers["Fetch-User-Agent"] = formatUserAgent(this.userAgent);
         const stringifiedHeaders: { [headerName: string]: string } = {};
