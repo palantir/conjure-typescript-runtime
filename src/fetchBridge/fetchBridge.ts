@@ -58,13 +58,13 @@ export interface IFetchBridgeParams {
 export class FetchBridge implements IHttpApiBridge {
     private static ACCEPT_HEADER = "accept";
 
-    private readonly baseUrl: string | Supplier<string>;
+    private readonly getBaseUrl: Supplier<string>;
     private readonly token: string | undefined;
     private readonly fetch: FetchFunction | undefined;
     private readonly userAgent: IUserAgent;
 
     constructor(params: IFetchBridgeParams) {
-        this.baseUrl = params.baseUrl;
+        this.getBaseUrl = typeof params.baseUrl === "string" ? () => params.baseUrl as string : params.baseUrl;
         this.token = params.token;
         this.fetch = params.fetch;
         this.userAgent = params.userAgent;
@@ -154,13 +154,6 @@ export class FetchBridge implements IHttpApiBridge {
                 throw new ConjureError(ConjureErrorType.Other, error);
             }
         }
-    }
-
-    private getBaseUrl(): string {
-        if (typeof this.baseUrl === "string") {
-            return this.baseUrl;
-        }
-        return this.baseUrl();
     }
 
     private appendQueryParameter(query: string[], key: string, value: any) {
