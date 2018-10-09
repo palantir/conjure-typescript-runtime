@@ -168,6 +168,28 @@ describe("FetchBridgeImpl", () => {
         await expect(bridge.callEndpoint(request)).resolves.toEqual(mockedResponseData);
     });
 
+    it("makes POST request with boolean data", async () => {
+        const request: IHttpEndpointOptions = {
+            data: false,
+            endpointName: "a",
+            endpointPath: "a/{var}/b",
+            method: "POST",
+            pathArguments: ["val"],
+            queryArguments: {},
+            requestMediaType: MediaType.APPLICATION_JSON,
+            responseMediaType: MediaType.APPLICATION_JSON,
+        };
+        const expectedUrl = `${baseUrl}/a/val/b`;
+        const expectedFetchRequest = createFetchRequest({
+            data: false,
+            method: "POST",
+            responseMediaType: request.responseMediaType,
+        });
+        const expectedFetchResponse = createFetchResponse("false", 200);
+        mockFetch(expectedUrl, expectedFetchRequest, expectedFetchResponse);
+        await expect(bridge.callEndpoint(request)).resolves.toEqual(false);
+    });
+
     it("makes POST request with form data without setting 'Content-Type'", async () => {
         const fakeBinaryData = "dGVzdA==";
         const request: IHttpEndpointOptions = {

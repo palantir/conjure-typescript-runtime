@@ -93,7 +93,7 @@ export class FetchBridge implements IHttpApiBridge {
         if (this.token !== undefined) {
             fetchRequestInit.headers = { ...fetchRequestInit.headers, Authorization: `Bearer ${this.token}` };
         }
-        if (data) {
+        if (data != null) {
             fetchRequestInit.body = this.handleBody(params);
             if (requestMediaType != null && requestMediaType !== MediaType.MULTIPART_FORM_DATA) {
                 // don't include for form data because we need the browser to fill in the form boundary
