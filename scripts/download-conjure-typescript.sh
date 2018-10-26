@@ -2,7 +2,7 @@
 
 set -e
 
-VERSION=3.0.0
+VERSION="$(grep "^com.palantir.conjure.typescript:conjure-typescript" < versions.props | tail -1 | sed 's/^com.palantir.conjure.typescript:conjure-typescript = \(.*\)$/\1/')"
 ARTIFACT_NAME="conjure-typescript-${VERSION}"
 DOWNLOAD_OUTPUT="build/downloads/conjure-typescript.tgz"
 
