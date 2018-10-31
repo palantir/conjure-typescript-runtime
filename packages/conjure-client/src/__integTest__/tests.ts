@@ -48,7 +48,7 @@ function isBlacklisted(endpointName: string, jsonString: string) {
 const bridge = new FetchBridge({
     baseUrl: "http://localhost:8000",
     userAgent: {
-        productName: "conjure-typescript-client",
+        productName: "conjure-typescript-runtime",
         productVersion: "0.0.0",
     },
 });
