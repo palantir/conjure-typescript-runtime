@@ -1,18 +1,21 @@
 {
   "name": "conjure-typescript-runtime",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "build": "yarn workspaces run build",
     "circle-publish": "yarn workspaces run circle-publish",
     "lint": "yarn workspaces run --no-bail lint",
     "test": "yarn workspaces run --no-bail test",
-    "verify": "lerna run verify"
+    "verify": "yarn workspaces run verify"
   },
   "workspaces": [
     "packages/*"
   ],
-  "repository": "git@github.com:palantir/conjure-typescript-runtime.git",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:palantir/conjure-typescript-runtime.git"
+  },
   "author": "Palantir Technologies, Inc",
   "license": "Apache-2.0"
 }
