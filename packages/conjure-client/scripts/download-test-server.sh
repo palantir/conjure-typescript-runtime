@@ -2,13 +2,15 @@
 
 set -euo pipefail
 
-VERSION="$(grep "^com.palantir.conjure.verification:*" < versions.props | tail -1 | sed 's/^com.palantir.conjure.verification:\* = \(.*\)$/\1/')"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
+VERSION="$(grep "^com.palantir.conjure.verification:*" < ../../versions.props | tail -1 | sed 's/^com.palantir.conjure.verification:\* = \(.*\)$/\1/')"
 TEST_CASES="verification-server-test-cases"
 API="verification-server-api"
 SERVER="verification-server"
 
-DOWNLOADS_DIR=build/downloads
-RESOURCES_DIR=build/resources
+DOWNLOADS_DIR="$DIR/build/downloads"
+RESOURCES_DIR="$DIR/build/resources"
 
 mkdir -p "$DOWNLOADS_DIR"/bin
 mkdir -p "$RESOURCES_DIR"

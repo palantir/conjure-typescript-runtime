@@ -51,7 +51,7 @@ module.exports = {
     testEnvironment: "jsdom",
     testMatch: ["<rootDir>/src/**/__tests__/*Tests.{ts,tsx}"],
     transform: {
-        "^.+\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js",
+        "^.+\\.(ts|tsx)$": require.resolve("ts-jest"),
     },
     verbose: true,
 };

@@ -2,13 +2,12 @@
 Thumbs.db
 .vscode/
 *.log
-/lib
-/node_modules
-/coverage
+lib
+node_modules
+coverage
 
 # Intellij
 .idea
 *.iml
 
 build
-__generated__
