@@ -3,14 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "lerna run build",
-    "circle-publish": "lerna run circle-publish",
-    "lint": "lerna run --no-bail lint",
-    "test": "lerna run --no-bail test",
+    "build": "yarn workspaces run build",
+    "circle-publish": "yarn workspaces run circle-publish",
+    "lint": "yarn workspaces run --no-bail lint",
+    "test": "yarn workspaces run --no-bail test",
     "verify": "lerna run verify"
-  },
-  "devDependencies": {
-    "@lerna/run": "^3.3.2"
   },
   "workspaces": [
     "packages/*"
