@@ -3,15 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "yarn workspaces run build",
-    "circle-publish": "yarn workspaces run circle-publish",
-    "lint": "yarn workspaces run --no-bail lint",
-    "test": "yarn workspaces run --no-bail test",
-    "verify": "yarn workspaces run verify"
+    "build": "lerna run build",
+    "circle-publish": "workspaces run circle-publish",
+    "lint": "lerna run --no-bail lint",
+    "test": "lerna run --no-bail test",
+    "verify": "lerna run verify"
   },
   "workspaces": [
     "packages/*"
   ],
+  "devDependencies": {
+    "lerna": "^3.4.3"
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:palantir/conjure-typescript-runtime.git"
