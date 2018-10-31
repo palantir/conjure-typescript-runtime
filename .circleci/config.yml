@@ -8,12 +8,13 @@ jobs:
       - restore_cache:
           name: Restore Yarn Package Cache
           keys:
-            - yarn-packages-v2-{{ checksum "yarn.lock" }}
-            - yarn-packages-v2-
+            - yarn-packages-{{ checksum "yarn.lock" }}
+            - yarn-packages-
       - run: yarn install --non-interactive --frozen-lockfile
       - save_cache:
-          key: yarn-packages-v2-{{ checksum "yarn.lock" }}
-          paths: ["."]
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+          paths:
+            - /root/project/node_modules
       - run: yarn build
       - deploy:
           command: |
