@@ -3,7 +3,7 @@ Thumbs.db
 .vscode/
 *.log
 /lib
-/node_modules
+node_modules
 /coverage
 
 # Intellij
@@ -11,4 +11,3 @@ Thumbs.db
 *.iml
 
 build
-__generated__
