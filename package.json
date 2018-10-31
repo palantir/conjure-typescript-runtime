@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "lerna run build",
-    "circle-publish": "workspaces run circle-publish",
+    "circle-publish": "lerna run circle-publish",
     "lint": "lerna run --no-bail lint",
     "test": "lerna run --no-bail test",
     "verify": "lerna run verify"
