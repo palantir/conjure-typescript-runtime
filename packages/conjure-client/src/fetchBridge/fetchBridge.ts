@@ -93,18 +93,19 @@ export class FetchBridge implements IHttpApiBridge {
         if (this.token !== undefined) {
             fetchRequestInit.headers = { ...fetchRequestInit.headers, Authorization: `Bearer ${this.token}` };
         }
-        if (data != null) {
-            fetchRequestInit.body = this.handleBody(params);
-            if (requestMediaType != null && requestMediaType !== MediaType.MULTIPART_FORM_DATA) {
-                // don't include for form data because we need the browser to fill in the form boundary
-                (fetchRequestInit.headers as any)["Content-Type"] = requestMediaType;
-            }
-        }
 
-        if (responseMediaType) {
+        if (requestMediaType != null && requestMediaType !== MediaType.MULTIPART_FORM_DATA) {
+            // don't include for form data because we need the browser to fill in the form boundary
+            (fetchRequestInit.headers as any)["Content-Type"] = requestMediaType;
+        }
+        if (responseMediaType != null) {
             // If an endpoint can return multiple content types, make sure it returns the type that we're expecting
             // instead of the default `*/*
             (fetchRequestInit.headers as any)[FetchBridge.ACCEPT_HEADER] = responseMediaType;
+        }
+
+        if (data != null) {
+            fetchRequestInit.body = this.handleBody(params);
         }
 
         const fetchFunction = this.fetch || fetch;
