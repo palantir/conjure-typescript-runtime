@@ -95,6 +95,7 @@ export class FetchBridge implements IHttpApiBridge {
         }
 
         if (requestMediaType != null && requestMediaType !== MediaType.MULTIPART_FORM_DATA) {
+            // don't include for form data because we need the browser to fill in the form boundary
             (fetchRequestInit.headers as any)["Content-Type"] = requestMediaType;
         }
         if (responseMediaType != null) {
