@@ -31,6 +31,9 @@ const MAX_RETRY_AFTER_MS = 60000;
  */
 export type BackoffStrategy = (attempt: number) => number | undefined;
 
+const SERVICE_UNAVAILABLE = 503;
+const TOO_MANY_REQUESTS = 429;
+
 /**
  * Implements "exponential backoff with full jitter", suggesting a backoff duration chosen randomly from the interval
  * `[0, backoffSlotSize * 2^c)` for the c-th retry for a maximum of `maxNumRetries` retries.
@@ -78,7 +81,7 @@ export class RetryingFetch {
     }
 
     private getRetryAfter(response: IFetchResponse, attempt: number): number | undefined {
-        if (response.status === 429) {
+        if (response.status === TOO_MANY_REQUESTS || response.status === SERVICE_UNAVAILABLE) {
             const backoffStrategyBackoff = this.backoffStrategy(attempt);
             if (backoffStrategyBackoff === undefined) {
                 return undefined;
@@ -95,33 +98,32 @@ export class RetryingFetch {
         return undefined;
     }
 
-    private doAttempt(
+    private async doAttempt(
         url: string | Request,
         init: RequestInit | undefined,
         attempt: number,
         resolve: (value: IFetchResponse) => void,
         reject: (value: any) => void,
-    ) {
+    ): Promise<void> {
         // fetch expects a nully context, so alias
         const fetchFunction = this.delegate;
-        fetchFunction(url, init)
-            .then(response => {
-                if (response.ok) {
-                    resolve(response);
-                    return;
-                }
+        try {
+            const response = await fetchFunction(url, init);
+            if (response.ok) {
+                resolve(response);
+                return;
+            }
 
-                const retryAfter = this.getRetryAfter(response, attempt);
-                if (retryAfter !== undefined) {
-                    // let's try again!
-                    setTimeout(() => this.doAttempt(url, init, attempt + 1, resolve, reject), retryAfter);
-                } else {
-                    // no more retries, return what we have
-                    resolve(response);
-                }
-            })
-            .catch(error => {
-                reject(error);
-            });
+            const retryAfter = this.getRetryAfter(response, attempt);
+            if (retryAfter !== undefined) {
+                // let's try again!
+                setTimeout(() => this.doAttempt(url, init, attempt + 1, resolve, reject), retryAfter);
+            } else {
+                // no more retries, return what we have
+                resolve(response);
+            }
+        } catch (e) {
+            reject(e);
+        }
     }
 }
