@@ -60,6 +60,23 @@ describe("RetryingFetch", () => {
         expect(delegateFetch.mock.calls.length).toBe(maxAttempts);
     });
 
+    it("retries on 503s", async () => {
+        const expectedUrl = `${baseUrl}/a/val/b`;
+        const expectedFetchRequest = createFetchRequest("POST");
+        const expectedFetchResponse = createFetchResponse(undefined, 503);
+
+        const delegateFetch = jest.fn((_, __) => {
+            return Promise.resolve(expectedFetchResponse);
+        });
+
+        const retryingFetch = new RetryingFetch(delegateFetch, backoff);
+
+        const response = retryingFetch.fetch(expectedUrl, expectedFetchRequest);
+
+        await expect(response).resolves.toBe(expectedFetchResponse);
+        expect(delegateFetch.mock.calls.length).toBe(maxAttempts);
+    });
+
     it("does not retry non-qos error response", async () => {
         const expectedUrl = `${baseUrl}/a/val/b`;
         const expectedFetchRequest = createFetchRequest("POST");
