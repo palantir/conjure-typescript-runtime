@@ -274,6 +274,25 @@ describe("FetchBridgeImpl", () => {
         await expect(bridge.callEndpoint(request)).resolves.toEqual(mockedResponseData);
     });
 
+    it("encodes boolean path params", async () => {
+        const request: IHttpEndpointOptions = {
+            endpointName: "a",
+            endpointPath: "a/{var1}/b/{var2}",
+            method: "GET",
+            pathArguments: [true, false],
+            queryArguments: {},
+            responseMediaType: MediaType.APPLICATION_JSON,
+        };
+        const expectedUrl = `${baseUrl}/a/true/b/false`;
+        const expectedFetchRequest = createFetchRequest({
+            method: "GET",
+            responseMediaType: request.responseMediaType,
+        });
+        const expectedFetchResponse = createFetchResponse(mockedResponseData, 200);
+        mockFetch(expectedUrl, expectedFetchRequest, expectedFetchResponse);
+        await expect(bridge.callEndpoint(request)).resolves.toEqual(mockedResponseData);
+    });
+
     it("passes headers", async () => {
         const request: IHttpEndpointOptions = {
             endpointName: "a",
