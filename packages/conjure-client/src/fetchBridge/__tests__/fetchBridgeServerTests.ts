@@ -47,8 +47,7 @@ describe("FetchBridgeImplServer", () => {
 
     it("should reject strange raw strings returned by Jetty (for consistency with http-remoting)", done => {
         app.all("/*", (_req, res) => {
-            res
-                .status(200)
+            res.status(200)
                 .set("Content-Type", "application/json")
                 .send("Hello, world!");
         });
@@ -64,8 +63,7 @@ describe("FetchBridgeImplServer", () => {
 
     it("should receive strings with quotes", done => {
         app.all("/*", (_req, res) => {
-            res
-                .status(200)
+            res.status(200)
                 .set("Content-Type", "application/json")
                 .send('"Hello, world!"');
         });
@@ -83,8 +81,7 @@ describe("FetchBridgeImplServer", () => {
         const payload = { dataset: "foo", count: 1 };
 
         app.all("/*", (_req, res) => {
-            res
-                .status(200)
+            res.status(200)
                 .set("Content-Type", "application/json")
                 .send(JSON.stringify(payload));
         });
