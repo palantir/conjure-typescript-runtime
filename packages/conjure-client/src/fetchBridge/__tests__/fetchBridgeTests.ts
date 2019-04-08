@@ -274,6 +274,27 @@ describe("FetchBridgeImpl", () => {
         await expect(bridge.callEndpoint(request)).resolves.toEqual(mockedResponseData);
     });
 
+    it("passes dynamic tokens", async () => {
+        const tokenProvider: () => string = jest.fn().mockReturnValueOnce(token);
+        bridge = new FetchBridge({ baseUrl, token: tokenProvider, fetch: undefined, userAgent });
+
+        const request: IHttpEndpointOptions = {
+            endpointName: "a",
+            endpointPath: "a/",
+            method: "GET",
+            pathArguments: [],
+            queryArguments: {},
+        };
+        const expectedUrl = `${baseUrl}/a/`;
+        const expectedFetchRequest = createFetchRequest({
+            method: "GET",
+            responseMediaType: request.responseMediaType,
+        });
+        const expectedFetchResponse = createFetchResponse(undefined, 204);
+        mockFetch(expectedUrl, expectedFetchRequest, expectedFetchResponse);
+        await expect(bridge.callEndpoint(request)).resolves.toBeUndefined();
+    });
+
     it("passes headers", async () => {
         const request: IHttpEndpointOptions = {
             endpointName: "a",

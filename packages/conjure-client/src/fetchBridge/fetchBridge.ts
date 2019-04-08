@@ -51,7 +51,7 @@ export interface IFetchBridgeParams {
      * This will be logged in receiving service's request logs as params.User-Agent
      */
     userAgent: IUserAgent;
-    token?: string | Supplier<string | undefined>;
+    token?: string | Supplier<string>;
     fetch?: FetchFunction;
 }
 
