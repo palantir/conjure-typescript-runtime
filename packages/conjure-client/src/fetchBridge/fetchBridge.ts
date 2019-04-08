@@ -51,7 +51,7 @@ export interface IFetchBridgeParams {
      * This will be logged in receiving service's request logs as params.User-Agent
      */
     userAgent: IUserAgent;
-    token?: string;
+    token?: string | Supplier<string | undefined>;
     fetch?: FetchFunction;
 }
 
@@ -59,13 +59,13 @@ export class FetchBridge implements IHttpApiBridge {
     private static ACCEPT_HEADER = "accept";
 
     private readonly getBaseUrl: Supplier<string>;
-    private readonly token: string | undefined;
+    private readonly getToken: Supplier<string | undefined>;
     private readonly fetch: FetchFunction | undefined;
     private readonly userAgent: IUserAgent;
 
     constructor(params: IFetchBridgeParams) {
-        this.getBaseUrl = typeof params.baseUrl === "string" ? () => params.baseUrl as string : params.baseUrl;
-        this.token = params.token;
+        this.getBaseUrl = typeof params.baseUrl === "function" ? params.baseUrl : () => params.baseUrl as string;
+        this.getToken = typeof params.token === "function" ? params.token : () => params.token as string | undefined;
         this.fetch = params.fetch;
         this.userAgent = params.userAgent;
     }
@@ -90,8 +90,9 @@ export class FetchBridge implements IHttpApiBridge {
             method,
         };
 
-        if (this.token !== undefined) {
-            fetchRequestInit.headers = { ...fetchRequestInit.headers, Authorization: `Bearer ${this.token}` };
+        const token = this.getToken();
+        if (token !== undefined) {
+            fetchRequestInit.headers = { ...fetchRequestInit.headers, Authorization: `Bearer ${token}` };
         }
 
         if (requestMediaType != null && requestMediaType !== MediaType.MULTIPART_FORM_DATA) {
