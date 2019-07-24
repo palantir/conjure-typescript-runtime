@@ -71,7 +71,8 @@ export class FetchBridge implements IHttpApiBridge {
     }
 
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
-        const url = `${this.getBaseUrl()}/${this.buildPath(params)}${this.buildQueryString(params)}`;
+        const query = this.buildQueryString(params);
+        const url = `${this.getBaseUrl()}/${this.buildPath(params)}${query.length > 0 ? `?${query}` : ""}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
         headers["Fetch-User-Agent"] = formatUserAgent(this.userAgent);
         const stringifiedHeaders: { [headerName: string]: string } = {};
@@ -172,26 +173,10 @@ export class FetchBridge implements IHttpApiBridge {
         return path;
     }
 
-    private buildQueryString(parameters: IHttpEndpointOptions) {
+    private buildQueryString(data: { [key: string]: any }) {
         const query: string[] = [];
-        for (const key of Object.keys(parameters.queryArguments)) {
-            const value = parameters.queryArguments[key];
-            if (value == null) {
-                continue;
-            }
-            if (value instanceof Array) {
-                value.forEach((v: any) => this.appendQueryParameter(query, key, v));
-            } else {
-                this.appendQueryParameter(query, key, value);
-            }
-        }
-        return query.length > 0 ? `?${query.join("&")}` : "";
-    }
-
-    private buildFormString(parameters: IHttpEndpointOptions) {
-        const query: string[] = [];
-        for (const key of Object.keys(parameters.data)) {
-            const value = parameters.data[key];
+        for (const key of Object.keys(data)) {
+            const value = data[key];
             if (value == null) {
                 continue;
             }
@@ -212,7 +197,7 @@ export class FetchBridge implements IHttpApiBridge {
             case MediaType.MULTIPART_FORM_DATA:
                 return parameters.data;
             case MediaType.APPLICATION_X_WWW_FORM_URLENCODED:
-                return this.buildFormString(parameters);
+                return this.buildQueryString(parameters);
             case MediaType.TEXT_PLAIN:
                 if (typeof parameters.data === "object") {
                     throw new Error("Invalid data: cannot send object as request media type text/plain");
