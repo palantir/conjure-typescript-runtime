@@ -71,7 +71,7 @@ export class FetchBridge implements IHttpApiBridge {
     }
 
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
-        const query = this.buildQueryString(params);
+        const query = this.buildQueryString(params.queryArguments);
         const url = `${this.getBaseUrl()}/${this.buildPath(params)}${query.length > 0 ? `?${query}` : ""}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
         headers["Fetch-User-Agent"] = formatUserAgent(this.userAgent);
@@ -197,7 +197,7 @@ export class FetchBridge implements IHttpApiBridge {
             case MediaType.MULTIPART_FORM_DATA:
                 return parameters.data;
             case MediaType.APPLICATION_X_WWW_FORM_URLENCODED:
-                return this.buildQueryString(parameters);
+                return this.buildQueryString(parameters.data);
             case MediaType.TEXT_PLAIN:
                 if (typeof parameters.data === "object") {
                     throw new Error("Invalid data: cannot send object as request media type text/plain");
