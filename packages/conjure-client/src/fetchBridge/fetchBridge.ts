@@ -188,6 +188,22 @@ export class FetchBridge implements IHttpApiBridge {
         return query.length > 0 ? `?${query.join("&")}` : "";
     }
 
+    private buildFormString(parameters: IHttpEndpointOptions) {
+        const query: string[] = [];
+        for (const key of Object.keys(parameters.data)) {
+            const value = parameters.data[key];
+            if (value == null) {
+                continue;
+            }
+            if (value instanceof Array) {
+                value.forEach((v: any) => this.appendQueryParameter(query, key, v));
+            } else {
+                this.appendQueryParameter(query, key, value);
+            }
+        }
+        return query.join("&");
+    }
+
     private handleBody(parameters: IHttpEndpointOptions) {
         switch (parameters.requestMediaType) {
             case MediaType.APPLICATION_JSON:
@@ -195,6 +211,8 @@ export class FetchBridge implements IHttpApiBridge {
             case MediaType.APPLICATION_OCTET_STREAM:
             case MediaType.MULTIPART_FORM_DATA:
                 return parameters.data;
+            case MediaType.APPLICATION_X_WWW_FORM_URLENCODED:
+                return this.buildFormString(parameters);
             case MediaType.TEXT_PLAIN:
                 if (typeof parameters.data === "object") {
                     throw new Error("Invalid data: cannot send object as request media type text/plain");
