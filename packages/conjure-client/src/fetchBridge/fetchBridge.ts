@@ -71,7 +71,8 @@ export class FetchBridge implements IHttpApiBridge {
     }
 
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
-        const url = `${this.getBaseUrl()}/${this.buildPath(params)}${this.buildQueryString(params)}`;
+        const query = this.buildQueryString(params.queryArguments);
+        const url = `${this.getBaseUrl()}/${this.buildPath(params)}${query.length > 0 ? `?${query}` : ""}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
         headers["Fetch-User-Agent"] = formatUserAgent(this.userAgent);
         const stringifiedHeaders: { [headerName: string]: string } = {};
@@ -172,10 +173,10 @@ export class FetchBridge implements IHttpApiBridge {
         return path;
     }
 
-    private buildQueryString(parameters: IHttpEndpointOptions) {
+    private buildQueryString(data: { [key: string]: any }) {
         const query: string[] = [];
-        for (const key of Object.keys(parameters.queryArguments)) {
-            const value = parameters.queryArguments[key];
+        for (const key of Object.keys(data)) {
+            const value = data[key];
             if (value == null) {
                 continue;
             }
@@ -185,7 +186,7 @@ export class FetchBridge implements IHttpApiBridge {
                 this.appendQueryParameter(query, key, value);
             }
         }
-        return query.length > 0 ? `?${query.join("&")}` : "";
+        return query.join("&");
     }
 
     private handleBody(parameters: IHttpEndpointOptions) {
@@ -195,6 +196,8 @@ export class FetchBridge implements IHttpApiBridge {
             case MediaType.APPLICATION_OCTET_STREAM:
             case MediaType.MULTIPART_FORM_DATA:
                 return parameters.data;
+            case MediaType.APPLICATION_X_WWW_FORM_URLENCODED:
+                return this.buildQueryString(parameters.data);
             case MediaType.TEXT_PLAIN:
                 if (typeof parameters.data === "object") {
                     throw new Error("Invalid data: cannot send object as request media type text/plain");

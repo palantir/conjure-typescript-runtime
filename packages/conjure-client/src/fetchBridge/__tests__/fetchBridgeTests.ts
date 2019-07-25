@@ -214,6 +214,33 @@ describe("FetchBridgeImpl", () => {
         await expect(bridge.callEndpoint(request)).resolves.toEqual(mockedResponseData);
     });
 
+    it("makes POST request with url encoded form data", async () => {
+        const request: IHttpEndpointOptions = {
+            data: {
+                param1: "a",
+                param2: ["b", "c"],
+                "param=3": "ürl-êñçódèd",
+            },
+            endpointName: "a",
+            endpointPath: "a/{var}/b",
+            method: "POST",
+            pathArguments: ["val"],
+            queryArguments: {},
+            requestMediaType: MediaType.APPLICATION_X_WWW_FORM_URLENCODED,
+            responseMediaType: MediaType.APPLICATION_JSON,
+        };
+        const expectedUrl = `${baseUrl}/a/val/b`;
+        const expectedFetchRequest = createFetchRequest({
+            contentType: "application/x-www-form-urlencoded",
+            data: "param1=a&param2=b&param2=c&param%3D3=%C3%BCrl-%C3%AA%C3%B1%C3%A7%C3%B3d%C3%A8d",
+            method: "POST",
+            responseMediaType: request.responseMediaType,
+        });
+        const expectedFetchResponse = createFetchResponse(mockedResponseData, 200);
+        mockFetch(expectedUrl, expectedFetchRequest, expectedFetchResponse);
+        await expect(bridge.callEndpoint(request)).resolves.toEqual(mockedResponseData);
+    });
+
     it("makes PUT request", async () => {
         const request: IHttpEndpointOptions = {
             data: mockedRequestData,
