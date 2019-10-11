@@ -198,9 +198,10 @@ export class FetchBridge implements IHttpApiBridge {
                 return parameters.data;
             case MediaType.APPLICATION_X_WWW_FORM_URLENCODED:
                 return this.buildQueryString(parameters.data);
+            case MediaType.TEXT_HTML:
             case MediaType.TEXT_PLAIN:
                 if (typeof parameters.data === "object") {
-                    throw new Error("Invalid data: cannot send object as request media type text/plain");
+                    throw new Error(`Invalid data: cannot send object as request media type ${parameters.requestMediaType}`);
                 }
                 return parameters.data;
             default:

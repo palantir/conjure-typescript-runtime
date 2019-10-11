@@ -241,6 +241,30 @@ describe("FetchBridgeImpl", () => {
         await expect(bridge.callEndpoint(request)).resolves.toEqual(mockedResponseData);
     });
 
+    it("makes POST request with html text data", async () => {
+        const fakeHtmlData = "<html>Hello World</html>";
+        const request: IHttpEndpointOptions = {
+            data: fakeHtmlData,
+            endpointName: "a",
+            endpointPath: "a/{var}/b",
+            method: "POST",
+            pathArguments: ["val"],
+            queryArguments: {},
+            requestMediaType: MediaType.TEXT_HTML,
+            responseMediaType: MediaType.APPLICATION_JSON,
+        };
+        const expectedUrl = `${baseUrl}/a/val/b`;
+        const expectedFetchRequest = createFetchRequest({
+            contentType: "text/html",
+            data: fakeHtmlData,
+            method: "POST",
+            responseMediaType: request.responseMediaType,
+        });
+        const expectedFetchResponse = createFetchResponse(mockedResponseData, 200);
+        mockFetch(expectedUrl, expectedFetchRequest, expectedFetchResponse);
+        await expect(bridge.callEndpoint(request)).resolves.toEqual(mockedResponseData);
+    });
+
     it("makes PUT request", async () => {
         const request: IHttpEndpointOptions = {
             data: mockedRequestData,

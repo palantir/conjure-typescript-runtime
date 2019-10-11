@@ -52,6 +52,7 @@ export enum MediaType {
     APPLICATION_OCTET_STREAM = "application/octet-stream",
     APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded",
     MULTIPART_FORM_DATA = "multipart/form-data",
+    TEXT_HTML = "text/html",
     TEXT_PLAIN = "text/plain",
 }
 
