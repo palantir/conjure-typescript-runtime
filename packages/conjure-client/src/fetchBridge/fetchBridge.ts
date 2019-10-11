@@ -201,7 +201,9 @@ export class FetchBridge implements IHttpApiBridge {
             case MediaType.TEXT_HTML:
             case MediaType.TEXT_PLAIN:
                 if (typeof parameters.data === "object") {
-                    throw new Error(`Invalid data: cannot send object as request media type ${parameters.requestMediaType}`);
+                    throw new Error(
+                        `Invalid data: cannot send object as request media type ${parameters.requestMediaType}`,
+                    );
                 }
                 return parameters.data;
             default:
