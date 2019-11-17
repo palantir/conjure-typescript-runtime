@@ -47,4 +47,18 @@ export class ConjureService {
             responseMediaType: MediaType.APPLICATION_JSON,
         });
     }
+
+    public binary(): Promise<ReadableStream<Uint8Array>> {
+        return this.bridge.callEndpoint<ReadableStream<Uint8Array>>({
+            endpointName: "binary",
+            endpointPath: "/binary",
+            headers: {},
+            method: "POST",
+            pathArguments: [],
+            queryArguments: {},
+            requestMediaType: MediaType.APPLICATION_JSON,
+            responseMediaType: MediaType.APPLICATION_OCTET_STREAM,
+            binaryAsStream: true,
+        });
+    }
 }

@@ -71,19 +71,14 @@ describe("Body serde", () => {
             if (shouldPass) {
                 const endpointResponse = await (testService as any)[endpointName](index);
                 if (endpointName === "receiveBinaryAliasExample") {
-                    return new Promise<void>((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.addEventListener("loadend", () => {
-                            confirmService
-                                .confirm(
-                                    endpointName,
-                                    index,
-                                    reader.result.replace("data:application/octet-stream;base64,", ""),
-                                )
-                                .then(resolve, reject);
-                        });
-                        reader.readAsDataURL(endpointResponse as Blob);
-                    });
+                    const streamReader = (endpointResponse as ReadableStream<Uint8Array>).getReader();
+                    let result = "";
+                    let chunk = await streamReader.read();
+                    while (!chunk.done) {
+                        chunk.value.forEach(byte => (result += String.fromCharCode(byte)));
+                        chunk = await streamReader.read();
+                    }
+                    return confirmService.confirm(endpointName, index, btoa(result));
                 } else {
                     return confirmService.confirm(endpointName, index, endpointResponse);
                 }

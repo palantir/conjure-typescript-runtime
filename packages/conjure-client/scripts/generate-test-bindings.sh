@@ -21,3 +21,20 @@ case $(uname -s) in
     Linux*) find "$TEST_DIR" -name "*.ts" -type f -exec sed -i "${REPLACE_STRING}" {} \;;;
     Darwin*) find "$TEST_DIR" -name "*.ts" -type f -exec sed -i "" "${REPLACE_STRING}" {} \;;
 esac
+
+# Patch in readable streams until generator supports it
+
+STREAM_INTERFACE_REPLACE="s|receiveBinaryAliasExample(index: number): Promise<Blob>|receiveBinaryAliasExample(index: number): Promise<ReadableStream<Uint8Array>>|g"
+STREAM_IMPL_REPLACE="s|return this.bridge.callEndpoint<Blob>({|return this.bridge.callEndpoint<ReadableStream<Uint8Array>>({\\
+            binaryAsStream: true,|g"
+
+case $(uname -s) in
+    Linux*)
+      find "$TEST_DIR" -name "*.ts" -type f -exec sed -i "${STREAM_INTERFACE_REPLACE}" {} \;
+      find "$TEST_DIR" -name "*.ts" -type f -exec sed -i "${STREAM_IMPL_REPLACE}" {} \;
+    ;;
+    Darwin*)
+      find "$TEST_DIR" -name "*.ts" -type f -exec sed -i "" "${STREAM_INTERFACE_REPLACE}" {} \;
+      find "$TEST_DIR" -name "*.ts" -type f -exec sed -i "" "${STREAM_IMPL_REPLACE}" {} \;
+    ;;
+esac
