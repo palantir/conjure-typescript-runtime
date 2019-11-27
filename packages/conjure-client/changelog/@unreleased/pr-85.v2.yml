@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Test against conjure-verification 0.17.0
+  links:
+  - https://github.com/palantir/conjure-typescript-runtime/pull/85
