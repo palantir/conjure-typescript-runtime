@@ -69,7 +69,24 @@ describe("Body serde", () => {
     function automaticTest(endpointName: string, index: number, shouldPass: boolean) {
         return async () => {
             if (shouldPass) {
-                return confirmService.confirm(endpointName, index, await (testService as any)[endpointName](index));
+                const endpointResponse = await (testService as any)[endpointName](index);
+                if (endpointName === "receiveBinaryAliasExample") {
+                    return new Promise<void>((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.addEventListener("loadend", () => {
+                            confirmService
+                                .confirm(
+                                    endpointName,
+                                    index,
+                                    reader.result.replace("data:application/octet-stream;base64,", ""),
+                                )
+                                .then(resolve, reject);
+                        });
+                        reader.readAsDataURL(endpointResponse as Blob);
+                    });
+                } else {
+                    return confirmService.confirm(endpointName, index, endpointResponse);
+                }
             } else {
                 assert.throws(async () => (testService as any)[endpointName](index), Error, "Should fail");
             }
