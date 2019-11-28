@@ -112,6 +112,7 @@ describe("RetryingFetch", () => {
         const originalSetTimeout = window.setTimeout;
         const mockedSetTimeout = jest.fn((callback, timeout) => {
             originalSetTimeout(callback, timeout);
+            return 0;
         });
         window.setTimeout = mockedSetTimeout;
 

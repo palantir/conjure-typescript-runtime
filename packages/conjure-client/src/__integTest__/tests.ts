@@ -17,17 +17,11 @@
 
 import { assert } from "chai";
 import { FetchBridge } from "../fetchBridge";
-import {
-    AutoDeserializeConfirmService,
-    AutoDeserializeService,
-    IClientTestCases,
-    SingleHeaderService,
-    SinglePathParamService,
-    SingleQueryParamService,
-} from "./__generated__";
+import { conjureVerificationServer } from "./__generated__";
 // HACKHACK to load test-cases
 // tslint:disable:no-var-requires
-const testCases: IClientTestCases = require("../../build/resources/verification-server-test-cases.json").client;
+const testCases: conjureVerificationServer.IClientTestCases = require("../../build/resources/verification-server-test-cases.json")
+    .client;
 
 const blacklist: { [endpointName: string]: string[] } = {
     receiveStringAliasExample: ['""'],
@@ -54,8 +48,8 @@ const bridge = new FetchBridge({
 });
 
 describe("Body serde", () => {
-    const testService = new AutoDeserializeService(bridge);
-    const confirmService = new AutoDeserializeConfirmService(bridge);
+    const testService = new conjureVerificationServer.AutoDeserializeService(bridge);
+    const confirmService = new conjureVerificationServer.AutoDeserializeConfirmService(bridge);
 
     Object.keys(testCases.autoDeserialize).map(endpointName => {
         const bodyTestCases = testCases.autoDeserialize[endpointName];
@@ -75,7 +69,24 @@ describe("Body serde", () => {
     function automaticTest(endpointName: string, index: number, shouldPass: boolean) {
         return async () => {
             if (shouldPass) {
-                return confirmService.confirm(endpointName, index, await (testService as any)[endpointName](index));
+                const endpointResponse = await (testService as any)[endpointName](index);
+                if (endpointName === "receiveBinaryAliasExample") {
+                    return new Promise<void>((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.addEventListener("loadend", () => {
+                            confirmService
+                                .confirm(
+                                    endpointName,
+                                    index,
+                                    reader.result.replace("data:application/octet-stream;base64,", ""),
+                                )
+                                .then(resolve, reject);
+                        });
+                        reader.readAsDataURL(endpointResponse as Blob);
+                    });
+                } else {
+                    return confirmService.confirm(endpointName, index, endpointResponse);
+                }
             } else {
                 assert.throws(async () => (testService as any)[endpointName](index), Error, "Should fail");
             }
@@ -84,7 +95,7 @@ describe("Body serde", () => {
 });
 
 describe("SingleHeaderService", () => {
-    const headerService = new SingleHeaderService(bridge);
+    const headerService = new conjureVerificationServer.SingleHeaderService(bridge);
     Object.keys(testCases.singleHeaderService).forEach(endpointName =>
         testCases.singleHeaderService[endpointName].map((value, i) => {
             const defineTest = isBlacklisted(endpointName, value) ? it.skip : it;
@@ -96,7 +107,7 @@ describe("SingleHeaderService", () => {
 });
 
 describe("SinglePathParamService", () => {
-    const pathService = new SinglePathParamService(bridge);
+    const pathService = new conjureVerificationServer.SinglePathParamService(bridge);
     Object.keys(testCases.singlePathParamService).forEach(endpointName =>
         testCases.singlePathParamService[endpointName].map((value, i) => {
             const defineTest = isBlacklisted(endpointName, value) ? it.skip : it;
@@ -108,7 +119,7 @@ describe("SinglePathParamService", () => {
 });
 
 describe("SingleQueryParamService", () => {
-    const queryService = new SingleQueryParamService(bridge);
+    const queryService = new conjureVerificationServer.SingleQueryParamService(bridge);
     Object.keys(testCases.singleQueryParamService).forEach(endpointName =>
         testCases.singleQueryParamService[endpointName].map((value, i) => {
             const defineTest = isBlacklisted(endpointName, value) ? it.skip : it;
