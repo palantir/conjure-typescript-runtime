@@ -1,7 +1,7 @@
 **/*
-!README.md
-!package.json
+!bin/*
 !lib/**/*
+!src/**/*
 **/__tests__/*
 **/__mocks__/*
-.npmrc
+**/__integTest__/*
