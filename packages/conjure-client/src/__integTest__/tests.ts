@@ -74,7 +74,7 @@ describe("Body serde", () => {
                     const streamReader = (endpointResponse as ReadableStream<Uint8Array>).getReader();
                     let result = "";
                     let chunk = await streamReader.read();
-                    while (!chunk.done) {
+                    for (let chunk = await streamReader.read(); !chunk.done(); chuk = await streamReader.read()) {
                         chunk.value.forEach(byte => (result += String.fromCharCode(byte)));
                         chunk = await streamReader.read();
                     }
