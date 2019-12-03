@@ -73,7 +73,7 @@ describe("Body serde", () => {
                 if (endpointName === "receiveBinaryAliasExample") {
                     const streamReader = (endpointResponse as ReadableStream<Uint8Array>).getReader();
                     let result = "";
-                    for (let chunk = await streamReader.read(); !chunk.done(); chuk = await streamReader.read()) {
+                    for (let chunk = await streamReader.read(); !chunk.done; chunk = await streamReader.read()) {
                         chunk.value.forEach(byte => (result += String.fromCharCode(byte)));
                     }
                     return confirmService.confirm(endpointName, index, btoa(result));
