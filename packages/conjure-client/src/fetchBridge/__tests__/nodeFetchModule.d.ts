@@ -15,4 +15,4 @@
  * limitations under the License.
  */
 
-declare module "node-fetch-polyfill";
+declare module "node-fetch";

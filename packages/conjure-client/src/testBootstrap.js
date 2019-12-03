@@ -18,6 +18,7 @@
 // tslint:disable no-var-requires
 require("es6-shim");
 require("whatwg-fetch");
+require("web-streams-polyfill");
 // tslint:enable no-var-requires
 
 window.fetch = jest.fn();

@@ -45,6 +45,9 @@ export interface IHttpEndpointOptions {
 
     /** Data to send in the body. */
     data?: any;
+
+    /** return binary response as web stream */
+    binaryAsStream?: boolean;
 }
 
 export enum MediaType {
