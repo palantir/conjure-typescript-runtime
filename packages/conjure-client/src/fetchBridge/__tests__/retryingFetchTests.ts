@@ -146,7 +146,6 @@ function createFetchRequest(method: string, data?: any, contentType = "applicati
 
 function createFetchResponse(data: any, status: number): IFetchResponse {
     return {
-        body: new ReadableStream(),
         blob: () => Promise.resolve(new Blob([data])),
         headers: new Headers(),
         json: () => Promise.resolve(JSON.parse(data)),

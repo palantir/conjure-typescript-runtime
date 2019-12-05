@@ -17,12 +17,10 @@
 
 import * as express from "express";
 import * as http from "http";
-import * as nodeFetch from "node-fetch";
-import { TextDecoder, TextEncoder } from "util";
+import * as nodeFetch from "node-fetch-polyfill";
 import { IHttpApiBridge } from "../../httpApiBridge";
 import { FetchBridge, IUserAgent } from "../fetchBridge";
 import { ConjureService } from "./conjureService";
-import { nodeFetchStreamAdapter } from "./nodeFetchStreamAdapter";
 
 const token = "TOKEN";
 
@@ -36,7 +34,7 @@ describe("FetchBridgeImplServer", () => {
         const port = 9000;
         const baseUrl = `http://${host}:${port}`;
         const userAgent: IUserAgent = { productName: "foo", productVersion: "1.2.3" };
-        bridge = new FetchBridge({ baseUrl, token, fetch: nodeFetchStreamAdapter(nodeFetch), userAgent });
+        bridge = new FetchBridge({ baseUrl, token, fetch: nodeFetch, userAgent });
 
         app = express();
         server = http.createServer(app);
@@ -50,7 +48,7 @@ describe("FetchBridgeImplServer", () => {
     it("should reject strange raw strings returned by Jetty (for consistency with http-remoting)", done => {
         app.all("/*", (_req, res) => {
             res.status(200)
-                .type("application/json")
+                .set("Content-Type", "application/json")
                 .send("Hello, world!");
         });
 
@@ -66,7 +64,7 @@ describe("FetchBridgeImplServer", () => {
     it("should receive strings with quotes", done => {
         app.all("/*", (_req, res) => {
             res.status(200)
-                .type("application/json")
+                .set("Content-Type", "application/json")
                 .send('"Hello, world!"');
         });
 
@@ -84,7 +82,7 @@ describe("FetchBridgeImplServer", () => {
 
         app.all("/*", (_req, res) => {
             res.status(200)
-                .type("application/json")
+                .set("Content-Type", "application/json")
                 .send(JSON.stringify(payload));
         });
 
@@ -93,26 +91,6 @@ describe("FetchBridgeImplServer", () => {
             .then(s => {
                 expect(s).toEqual(payload);
                 done();
-            })
-            .catch(fail);
-    });
-
-    it("should stream binary responses", testDone => {
-        const response = { dataset: "foo", count: 1 };
-
-        app.all("/*", (_req, res) => {
-            res.status(200)
-                .type("application/octet-stream")
-                .send(Buffer.from(new TextEncoder().encode(JSON.stringify(response))));
-        });
-
-        new ConjureService(bridge)
-            .binary()
-            .then(s => s.getReader().read())
-            .then(({ done, value }) => {
-                expect(done).toEqual(false);
-                expect(JSON.parse(new TextDecoder().decode(value))).toEqual(response);
-                testDone();
             })
             .catch(fail);
     });

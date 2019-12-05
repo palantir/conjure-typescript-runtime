@@ -17,7 +17,6 @@
 
 import { ConjureError, ConjureErrorType } from "../errors";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
-import { blobToReadableStream } from "./blobReadableStreamAdapter";
 
 export interface IFetchBody {
     json(): Promise<any>;
@@ -26,7 +25,6 @@ export interface IFetchBody {
 }
 
 export interface IFetchResponse extends IFetchBody {
-    readonly body: ReadableStream<Uint8Array> | null;
     readonly headers: Headers;
     readonly ok: boolean;
     readonly status: number;
@@ -73,57 +71,6 @@ export class FetchBridge implements IHttpApiBridge {
     }
 
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
-        const fetchPromise = this.makeFetchCall(params);
-
-        try {
-            const response = await fetchPromise;
-            if (response.status === 204) {
-                // Users of this HTTP bridge are responsible for declaring whether their endpoint might return a 204
-                // by including `| undefined` in callEndpoint's generic type param. We choose this over declaring the
-                // return type of this method as `Promise<T | undefined>` so that API calls which are guaranteed to
-                // resolve to a non-null value (when successful) don't have to deal with an unreachable code path.
-                return undefined!;
-            }
-
-            const contentType =
-                response.headers.get("Content-Type") != null ? (response.headers.get("Content-Type") as string) : "";
-            if (contentType.includes(MediaType.APPLICATION_OCTET_STREAM) && params.binaryAsStream) {
-                return this.handleBinaryResponseBody(response) as any;
-            }
-
-            let bodyPromise;
-            if (contentType.includes(MediaType.APPLICATION_JSON)) {
-                bodyPromise = response.json();
-            } else if (contentType.includes(MediaType.APPLICATION_OCTET_STREAM)) {
-                bodyPromise = response.blob();
-            } else {
-                bodyPromise = response.text();
-            }
-
-            let body;
-            try {
-                body = await bodyPromise;
-            } catch (error) {
-                throw new ConjureError(ConjureErrorType.Parse, error, response.status);
-            }
-
-            if (!response.ok) {
-                throw new ConjureError(ConjureErrorType.Status, undefined, response.status, body);
-            }
-
-            return body;
-        } catch (error) {
-            if (error instanceof ConjureError) {
-                throw error;
-            } else if (error instanceof TypeError) {
-                throw new ConjureError(ConjureErrorType.Network, error);
-            } else {
-                throw new ConjureError(ConjureErrorType.Other, error);
-            }
-        }
-    }
-
-    private makeFetchCall(params: IHttpEndpointOptions): Promise<IFetchResponse> {
         const query = this.buildQueryString(params.queryArguments);
         const url = `${this.getBaseUrl()}/${this.buildPath(params)}${query.length > 0 ? `?${query}` : ""}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
@@ -165,14 +112,50 @@ export class FetchBridge implements IHttpApiBridge {
 
         const fetchFunction = this.fetch || fetch;
 
-        return fetchFunction(url, fetchRequestInit);
-    }
+        try {
+            const response = await fetchFunction(url, fetchRequestInit);
+            if (response.status === 204) {
+                // Users of this HTTP bridge are responsible for declaring whether their endpoint might return a 204
+                // by including `| undefined` in callEndpoint's generic type param. We choose this over declaring the
+                // return type of this method as `Promise<T | undefined` so that API calls which are guaranteed to
+                // resolve to a non-null value (when successful) don't have to deal with an unreachable code path.
+                return undefined!;
+            }
 
-    private handleBinaryResponseBody(response: IFetchResponse): ReadableStream<Uint8Array> {
-        if (response.body === null) {
-            return blobToReadableStream(response.blob());
-        } else {
-            return response.body;
+            const contentType = response.headers.get("Content-Type");
+            let bodyPromise;
+            if (contentType != null) {
+                if (contentType.includes(MediaType.APPLICATION_JSON)) {
+                    bodyPromise = response.json();
+                } else if (contentType.includes(MediaType.APPLICATION_OCTET_STREAM)) {
+                    bodyPromise = response.blob();
+                } else {
+                    bodyPromise = response.text();
+                }
+            } else {
+                bodyPromise = response.text();
+            }
+
+            let body;
+            try {
+                body = await bodyPromise;
+            } catch (error) {
+                throw new ConjureError(ConjureErrorType.Parse, error, response.status);
+            }
+
+            if (!response.ok) {
+                throw new ConjureError(ConjureErrorType.Status, undefined, response.status, body);
+            }
+
+            return body;
+        } catch (error) {
+            if (error instanceof ConjureError) {
+                throw error;
+            } else if (error instanceof TypeError) {
+                throw new ConjureError(ConjureErrorType.Network, error);
+            } else {
+                throw new ConjureError(ConjureErrorType.Other, error);
+            }
         }
     }
 
