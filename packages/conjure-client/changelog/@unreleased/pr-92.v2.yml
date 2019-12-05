@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Revert change which caused an implicit break
+  links:
+  - https://github.com/palantir/conjure-typescript-runtime/pull/92
