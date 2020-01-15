@@ -190,7 +190,11 @@ export class FetchBridge implements IHttpApiBridge {
         return path;
     }
 
-    private buildQueryString(data: { [key: string]: any }) {
+    private buildQueryString(data: any) {
+        if (data == null) {
+            return "";
+        }
+
         const query: string[] = [];
         for (const key of Object.keys(data)) {
             const value = data[key];
