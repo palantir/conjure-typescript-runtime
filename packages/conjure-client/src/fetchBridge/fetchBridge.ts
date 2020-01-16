@@ -190,7 +190,7 @@ export class FetchBridge implements IHttpApiBridge {
         return path;
     }
 
-    private buildQueryString(data: any) {
+    private buildQueryString(data: { [key: string]: any }) {
         if (data == null) {
             return "";
         }

@@ -41,7 +41,7 @@ export interface IHttpEndpointOptions {
     pathArguments: any[];
 
     /** Key-value mappings to be appended to the request query string. */
-    queryArguments: any;
+    queryArguments: { [key: string]: any };
 
     /** Data to send in the body. */
     data?: any;
