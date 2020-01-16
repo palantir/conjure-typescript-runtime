@@ -1,5 +1,5 @@
-type: break
-break:
-  description: Improve typing to IHttpEndpointOptions.queryArguments
+type: fix
+fix:
+  description: Check that queryArguments is non-null before iterating over keys
   links:
     - https://github.com/palantir/conjure-typescript-runtime/pull/94
