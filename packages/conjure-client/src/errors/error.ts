@@ -50,5 +50,6 @@ export class ConjureError<E> {
 }
 
 export function isConjureError(error: any): error is ConjureError<never> {
-    return error instanceof ConjureError;
+    const conjureErrorTypes = Object.keys(ConjureErrorType).map(key => (ConjureErrorType[key as keyof typeof ConjureErrorType]));   
+    return error != null && conjureErrorTypes.indexOf(error.type) !== -1 && (error.status == null || typeof error.status === "number");
 }
