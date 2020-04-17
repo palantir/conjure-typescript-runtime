@@ -50,8 +50,5 @@ export class ConjureError<E> {
 }
 
 export function isConjureError(error: any): error is ConjureError<never> {
-    return (
-        error instanceof ConjureError ||
-        (error.__proto__ && error.__proto__.constructor && error.__proto__.constructor.name === ConjureError.name)
-    );
+    return error instanceof ConjureError;
 }
