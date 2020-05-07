@@ -62,22 +62,23 @@ export class RetryingFetch {
         });
     }
 
-    private getRetryAfterHeaderValue(response: IFetchResponse): number | undefined {
+    private getRetryAfterHeaderValueInMilliseconds(response: IFetchResponse): number | undefined {
         const retryAfterHeader = response.headers.get("Retry-After");
         if (retryAfterHeader == null) {
             return undefined;
         }
 
-        const retryAfter = parseInt(retryAfterHeader, 10);
-        if (isNaN(retryAfter)) {
+        const retryAfterInSeconds = parseInt(retryAfterHeader, 10);
+        if (isNaN(retryAfterInSeconds)) {
             return undefined;
         }
 
-        if (retryAfter < 0 || retryAfter > MAX_RETRY_AFTER_MS) {
+        const retryAfterInMilliseconds = retryAfterInSeconds * 1000;
+        if (retryAfterInMilliseconds < 0 || retryAfterInMilliseconds > MAX_RETRY_AFTER_MS) {
             return undefined;
         }
 
-        return retryAfter;
+        return retryAfterInMilliseconds;
     }
 
     private getRetryAfter(response: IFetchResponse, attempt: number): number | undefined {
@@ -87,7 +88,7 @@ export class RetryingFetch {
                 return undefined;
             }
 
-            const retryAfterFromHeader = this.getRetryAfterHeaderValue(response);
+            const retryAfterFromHeader = this.getRetryAfterHeaderValueInMilliseconds(response);
             if (retryAfterFromHeader !== undefined) {
                 return retryAfterFromHeader;
             } else {

@@ -100,7 +100,7 @@ describe("RetryingFetch", () => {
         const expectedFetchRequest = createFetchRequest("POST");
         const expectedFetchResponse = createFetchResponse(undefined, 429);
         if (expectedFetchResponse.headers instanceof Headers) {
-            expectedFetchResponse.headers.append("Retry-After", "123");
+            expectedFetchResponse.headers.append("Retry-After", "2");
         }
 
         const delegateFetch = jest.fn((_, __) => {
@@ -117,7 +117,7 @@ describe("RetryingFetch", () => {
         window.setTimeout = mockedSetTimeout;
 
         await retryingFetch.fetch(expectedUrl, expectedFetchRequest);
-        expect(mockedSetTimeout.mock.calls[0][1]).toEqual(123);
+        expect(mockedSetTimeout.mock.calls[0][1]).toEqual(2000);
 
         // restore
         window.setTimeout = originalSetTimeout;
