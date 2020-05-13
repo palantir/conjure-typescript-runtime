@@ -16,7 +16,7 @@
  */
 
 import { ConjureError, ConjureErrorType } from "../errors";
-import { IHttpApiBridge, IHttpEndpointOptions, IMinifiedHttpEndpointOptions, MediaType } from "../httpApiBridge";
+import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
 import { blobToReadableStream } from "./blobReadableStreamAdapter";
 
 export interface IFetchBody {
@@ -72,18 +72,31 @@ export class FetchBridge implements IHttpApiBridge {
         this.userAgent = params.userAgent;
     }
 
-    public call<T>(params: IMinifiedHttpEndpointOptions): Promise<T> {
+    public call<T>(
+        serviceName: string,
+        endpointPath: string,
+        endpointName: string,
+        method: string,
+        data?: any,
+        headers?: { [p: string]: string | number | boolean | undefined | null },
+        queryArguments?: { [p: string]: any },
+        pathArguments?: any[],
+        requestMediaType?: string,
+        responseMediaType?: string,
+    ): Promise<T> {
         return this.callEndpoint({
-            serviceName: params.sn,
-            endpointPath: params.ep,
-            endpointName: params.en,
-            headers: params.h == null ? {} : params.h,
-            method: params.m,
-            requestMediaType: params.reqmt == null ? MediaType.APPLICATION_JSON : this.getMediaType(params.reqmt),
-            responseMediaType: params.respmt == null ? MediaType.APPLICATION_JSON : this.getMediaType(params.respmt),
-            pathArguments: params.pa == null ? [] : params.pa,
-            queryArguments: params.qa == null ? {} : params.qa,
-            data: params.d,
+            serviceName,
+            endpointPath,
+            endpointName,
+            method,
+            data,
+            headers: headers == null ? {} : headers,
+            requestMediaType:
+                requestMediaType == null ? MediaType.APPLICATION_JSON : this.getMediaType(requestMediaType),
+            responseMediaType:
+                responseMediaType == null ? MediaType.APPLICATION_JSON : this.getMediaType(responseMediaType),
+            queryArguments: queryArguments == null ? {} : queryArguments,
+            pathArguments: pathArguments == null ? [] : pathArguments,
             binaryAsStream: true,
         });
     }
