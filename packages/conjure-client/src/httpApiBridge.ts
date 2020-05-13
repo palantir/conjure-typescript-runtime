@@ -68,10 +68,10 @@ export interface IHttpApiBridge {
     call<T>(
         /** Conjure service name. Doesn't affect the network request. */
         serviceName: string,
-        /** Path to make a request to, e.g. "/foo/{param1}/bar". */
-        endpointPath: string,
         /** Conjure endpoint name. Doesn't affect the network request. */
         endpointName: string,
+        /** Path to make a request to, e.g. "/foo/{param1}/bar". */
+        endpointPath: string,
         /** HTTP method. */
         method: string,
         /** Data to send in the body. */
