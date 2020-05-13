@@ -16,7 +16,7 @@
  */
 
 import { ConjureError, ConjureErrorType } from "../errors";
-import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
+import { IHttpApiBridge, IHttpEndpointOptions, IMinifiedHttpEndpointOptions, MediaType } from "../httpApiBridge";
 import { blobToReadableStream } from "./blobReadableStreamAdapter";
 
 export interface IFetchBody {
@@ -70,6 +70,22 @@ export class FetchBridge implements IHttpApiBridge {
         this.getToken = typeof params.token === "function" ? params.token : () => params.token as string | undefined;
         this.fetch = params.fetch;
         this.userAgent = params.userAgent;
+    }
+
+    public call<T>(params: IMinifiedHttpEndpointOptions): Promise<T> {
+        return this.callEndpoint({
+            serviceName: params.sn,
+            endpointPath: params.ep,
+            endpointName: params.en,
+            headers: params.h == null ? {} : params.h,
+            method: params.m,
+            requestMediaType: params.reqmt == null ? MediaType.APPLICATION_JSON : this.getMediaType(params.reqmt),
+            responseMediaType: params.respmt == null ? MediaType.APPLICATION_JSON : this.getMediaType(params.respmt),
+            pathArguments: params.pa == null ? [] : params.pa,
+            queryArguments: params.qa == null ? {} : params.qa,
+            data: params.d,
+            binaryAsStream: true,
+        });
     }
 
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
@@ -234,5 +250,21 @@ export class FetchBridge implements IHttpApiBridge {
             input = input.slice(1);
         }
         return input;
+    }
+
+    private getMediaType(value: string): MediaType {
+        if (value === MediaType.APPLICATION_JSON) {
+            return MediaType.APPLICATION_JSON;
+        } else if (value === MediaType.APPLICATION_OCTET_STREAM) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        } else if (value === MediaType.APPLICATION_X_WWW_FORM_URLENCODED) {
+            return MediaType.APPLICATION_X_WWW_FORM_URLENCODED;
+        } else if (value === MediaType.MULTIPART_FORM_DATA) {
+            return MediaType.MULTIPART_FORM_DATA;
+        } else if (value === MediaType.TEXT_PLAIN) {
+            return MediaType.TEXT_PLAIN;
+        }
+        // TODO(forozco): use safe errors
+        throw new Error("Unexpected media type " + value);
     }
 }
