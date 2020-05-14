@@ -68,9 +68,9 @@ export class FetchBridge implements IHttpApiBridge {
 
     public call<T>(
         serviceName: string,
-        endpointPath: string,
         endpointName: string,
         method: string,
+        endpointPath: string,
         data?: any,
         headers?: { [p: string]: string | number | boolean | undefined | null },
         queryArguments?: { [p: string]: any },
@@ -80,9 +80,9 @@ export class FetchBridge implements IHttpApiBridge {
     ): Promise<T> {
         return this.callEndpoint({
             serviceName,
-            endpointPath,
             endpointName,
             method,
+            endpointPath,
             data,
             headers: headers == null ? {} : headers,
             requestMediaType:

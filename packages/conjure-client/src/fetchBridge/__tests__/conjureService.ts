@@ -48,6 +48,10 @@ export class ConjureService {
         });
     }
 
+    public bodyCompact(data: any): Promise<string> {
+        return this.bridge.call("ConjureService", "bodyCompact", "POST", "/body", data);
+    }
+
     public binary(): Promise<ReadableStream<Uint8Array>> {
         return this.bridge.callEndpoint<ReadableStream<Uint8Array>>({
             endpointName: "binary",
