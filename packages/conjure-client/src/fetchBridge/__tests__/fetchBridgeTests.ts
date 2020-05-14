@@ -20,6 +20,7 @@ import { ConjureError, ConjureErrorType } from "../../errors";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../../httpApiBridge";
 import { IUserAgent } from "../../userAgent";
 import { FetchBridge } from "../fetchBridge";
+import { IMPLEMENTATION_VERSION } from "../../generated";
 
 const baseUrl = "https://host.domain/path";
 const token = "TOKEN";
@@ -483,7 +484,7 @@ function createFetchRequest(opts: ICreateFetchRequestOpts): RequestInit {
         headers: {
             ...headers,
             Authorization: `Bearer ${token}`,
-            "Fetch-User-Agent": "foo/1.2.3 conjure-client/0.0.0",
+            "Fetch-User-Agent": `foo/1.2.3 conjure-client/${IMPLEMENTATION_VERSION}`,
         },
         method,
     };
