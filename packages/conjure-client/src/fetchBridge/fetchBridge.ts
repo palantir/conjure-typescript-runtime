@@ -62,7 +62,7 @@ export class FetchBridge implements IHttpApiBridge {
         this.getToken = typeof params.token === "function" ? params.token : () => params.token as string | undefined;
         this.fetch = params.fetch;
         this.userAgent = new UserAgent(params.userAgent, [
-            { productName: "conjure-client", productVersion: IMPLEMENTATION_VERSION },
+            { productName: "conjure-typescript-runtime", productVersion: IMPLEMENTATION_VERSION },
         ]);
     }
 

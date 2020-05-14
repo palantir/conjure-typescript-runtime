@@ -484,7 +484,7 @@ function createFetchRequest(opts: ICreateFetchRequestOpts): RequestInit {
         headers: {
             ...headers,
             Authorization: `Bearer ${token}`,
-            "Fetch-User-Agent": `foo/1.2.3 conjure-client/${IMPLEMENTATION_VERSION}`,
+            "Fetch-User-Agent": `foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`,
         },
         method,
     };
