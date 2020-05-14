@@ -8,5 +8,8 @@
       "Copyright \\d{4} Palantir Technologies, Inc."
     ],
     "object-literal-sort-keys": false
+  },
+  "linterOptions": {
+    "exclude": ["src/generated/*"]
   }
 }

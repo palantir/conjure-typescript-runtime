@@ -17,8 +17,10 @@
 
 import * as fetchMock from "fetch-mock";
 import { ConjureError, ConjureErrorType } from "../../errors";
+import { IMPLEMENTATION_VERSION } from "../../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../../httpApiBridge";
-import { FetchBridge, IUserAgent } from "../fetchBridge";
+import { IUserAgent } from "../../userAgent";
+import { FetchBridge } from "../fetchBridge";
 
 const baseUrl = "https://host.domain/path";
 const token = "TOKEN";
@@ -482,7 +484,7 @@ function createFetchRequest(opts: ICreateFetchRequestOpts): RequestInit {
         headers: {
             ...headers,
             Authorization: `Bearer ${token}`,
-            "Fetch-User-Agent": "foo/1.2.3",
+            "Fetch-User-Agent": `foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`,
         },
         method,
     };
