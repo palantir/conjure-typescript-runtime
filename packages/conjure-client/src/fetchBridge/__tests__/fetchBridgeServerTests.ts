@@ -98,6 +98,24 @@ describe("FetchBridgeImplServer", () => {
             .catch(fail);
     });
 
+    it("compact method should receive JSON stringified payloads", done => {
+        const payload = { dataset: "foo", count: 1 };
+
+        app.all("/*", (_req, res) => {
+            res.status(200)
+                .type("application/json")
+                .send(JSON.stringify(payload));
+        });
+
+        new ConjureService(bridge)
+            .bodyCompact(payload)
+            .then(s => {
+                expect(s).toEqual(payload);
+                done();
+            })
+            .catch(fail);
+    });
+
     it("should stream binary responses", testDone => {
         const response = { dataset: "foo", count: 1 };
 

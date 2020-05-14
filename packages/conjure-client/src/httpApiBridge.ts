@@ -79,7 +79,7 @@ export interface IHttpApiBridge {
         /** HTTP headers. */
         headers?: { [header: string]: string | number | boolean | undefined | null },
         /** Key-value mappings to be appended to the request query string. */
-        queryParams?: { [paramName: string]: any },
+        queryArguments?: { [paramName: string]: any },
         /** Values to be interpolated into the endpointPath. */
         pathArguments?: any[],
         /** MIME type of the outgoing request, if absent defaults to "application/json" */
