@@ -9,6 +9,7 @@
     "build": "npm-run-all clean lint compile test",
     "circle-publish": "./scripts/circle-publish-npm",
     "clean": "rm -rf lib/*",
+    "precompile": "./scripts/generate-library-version.sh",
     "compile": "tsc -p ./src",
     "downloadConjureTypeScript": "./scripts/download-conjure-typescript.sh",
     "downloadTestServer": "./scripts/download-test-server.sh",

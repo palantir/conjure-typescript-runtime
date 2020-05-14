@@ -10,4 +10,6 @@ coverage
 .idea
 *.iml
 
+generated
+
 build

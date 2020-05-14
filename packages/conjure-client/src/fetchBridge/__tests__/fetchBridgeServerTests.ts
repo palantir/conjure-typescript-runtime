@@ -20,7 +20,8 @@ import * as http from "http";
 import * as nodeFetch from "node-fetch";
 import { TextDecoder, TextEncoder } from "util";
 import { IHttpApiBridge } from "../../httpApiBridge";
-import { FetchBridge, IUserAgent } from "../fetchBridge";
+import { IUserAgent } from "../../userAgent";
+import { FetchBridge } from "../fetchBridge";
 import { ConjureService } from "./conjureService";
 import { nodeFetchStreamAdapter } from "./nodeFetchStreamAdapter";
 

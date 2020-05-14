@@ -16,7 +16,9 @@
  */
 
 import { ConjureError, ConjureErrorType } from "../errors";
+import { IMPLEMENTATION_VERSION } from "../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
+import { IUserAgent, UserAgent } from "../userAgent";
 import { blobToReadableStream } from "./blobReadableStreamAdapter";
 
 export interface IFetchBody {
@@ -33,16 +35,6 @@ export interface IFetchResponse extends IFetchBody {
 }
 
 export type FetchFunction = (url: string | Request, init?: RequestInit) => Promise<IFetchResponse>;
-
-export interface IUserAgent {
-    productName: string;
-    productVersion: string;
-}
-
-function formatUserAgent(userAgent: IUserAgent): string {
-    const { productName, productVersion } = userAgent;
-    return `${productName}/${productVersion}`;
-}
 
 export type Supplier<T> = () => T;
 
@@ -63,13 +55,15 @@ export class FetchBridge implements IHttpApiBridge {
     private readonly getBaseUrl: Supplier<string>;
     private readonly getToken: Supplier<string | undefined>;
     private readonly fetch: FetchFunction | undefined;
-    private readonly userAgent: IUserAgent;
+    private readonly userAgent: UserAgent;
 
     constructor(params: IFetchBridgeParams) {
         this.getBaseUrl = typeof params.baseUrl === "function" ? params.baseUrl : () => params.baseUrl as string;
         this.getToken = typeof params.token === "function" ? params.token : () => params.token as string | undefined;
         this.fetch = params.fetch;
-        this.userAgent = params.userAgent;
+        this.userAgent = new UserAgent(params.userAgent, [
+            { productName: "conjure-client", productVersion: IMPLEMENTATION_VERSION },
+        ]);
     }
 
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
@@ -127,8 +121,9 @@ export class FetchBridge implements IHttpApiBridge {
         const query = this.buildQueryString(params.queryArguments);
         const url = `${this.getBaseUrl()}/${this.buildPath(params)}${query.length > 0 ? `?${query}` : ""}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
-        headers["Fetch-User-Agent"] = formatUserAgent(this.userAgent);
-        const stringifiedHeaders: { [headerName: string]: string } = {};
+        const stringifiedHeaders: { [headerName: string]: string } = {
+            "Fetch-User-Agent": this.userAgent.toString(),
+        };
 
         // Only send present headers as strings
         Object.keys(headers).forEach(key => {
