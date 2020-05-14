@@ -60,4 +60,31 @@ export enum MediaType {
 
 export interface IHttpApiBridge {
     callEndpoint<T>(parameters: IHttpEndpointOptions): Promise<T>;
+
+    /**
+     * Identical to callEndpoint replacing a request object with individual parameters to reduce the total code size
+     * because of the field name overhead.
+     */
+    call<T>(
+        /** Conjure service name. Doesn't affect the network request. */
+        serviceName: string,
+        /** Conjure endpoint name. Doesn't affect the network request. */
+        endpointName: string,
+        /** HTTP method. */
+        method: string,
+        /** Path to make a request to, e.g. "/foo/{param1}/bar". */
+        endpointPath: string,
+        /** Data to send in the body. */
+        data?: any,
+        /** HTTP headers. */
+        headers?: { [header: string]: string | number | boolean | undefined | null },
+        /** Key-value mappings to be appended to the request query string. */
+        queryParams?: { [paramName: string]: any },
+        /** Values to be interpolated into the endpointPath. */
+        pathArguments?: any[],
+        /** MIME type of the outgoing request, if absent defaults to "application/json" */
+        requestMediaType?: string,
+        /** MIME type of the expected server response, if absent defaults to "application/json" */
+        responseMediaType?: string,
+    ): Promise<T>;
 }

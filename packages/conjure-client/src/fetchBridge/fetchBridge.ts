@@ -66,6 +66,35 @@ export class FetchBridge implements IHttpApiBridge {
         ]);
     }
 
+    public call<T>(
+        serviceName: string,
+        endpointPath: string,
+        endpointName: string,
+        method: string,
+        data?: any,
+        headers?: { [p: string]: string | number | boolean | undefined | null },
+        queryArguments?: { [p: string]: any },
+        pathArguments?: any[],
+        requestMediaType?: string,
+        responseMediaType?: string,
+    ): Promise<T> {
+        return this.callEndpoint({
+            serviceName,
+            endpointPath,
+            endpointName,
+            method,
+            data,
+            headers: headers == null ? {} : headers,
+            requestMediaType:
+                requestMediaType == null ? MediaType.APPLICATION_JSON : this.getMediaType(requestMediaType),
+            responseMediaType:
+                responseMediaType == null ? MediaType.APPLICATION_JSON : this.getMediaType(responseMediaType),
+            queryArguments: queryArguments == null ? {} : queryArguments,
+            pathArguments: pathArguments == null ? [] : pathArguments,
+            binaryAsStream: true,
+        });
+    }
+
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
         const fetchPromise = this.makeFetchCall(params);
 
@@ -229,5 +258,21 @@ export class FetchBridge implements IHttpApiBridge {
             input = input.slice(1);
         }
         return input;
+    }
+
+    private getMediaType(value: string): MediaType {
+        if (value === MediaType.APPLICATION_JSON) {
+            return MediaType.APPLICATION_JSON;
+        } else if (value === MediaType.APPLICATION_OCTET_STREAM) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        } else if (value === MediaType.APPLICATION_X_WWW_FORM_URLENCODED) {
+            return MediaType.APPLICATION_X_WWW_FORM_URLENCODED;
+        } else if (value === MediaType.MULTIPART_FORM_DATA) {
+            return MediaType.MULTIPART_FORM_DATA;
+        } else if (value === MediaType.TEXT_PLAIN) {
+            return MediaType.TEXT_PLAIN;
+        }
+        // TODO(forozco): use safe errors
+        throw new Error("Unexpected media type " + value);
     }
 }
