@@ -20,9 +20,6 @@ export interface IUserAgent {
     productVersion: string;
 }
 
-/**
- * @internal
- */
 export class UserAgent {
     private readonly stringValue: string;
 

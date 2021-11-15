@@ -19,4 +19,4 @@ export { FetchBridge as DefaultHttpApiBridge } from "./fetchBridge";
 export * from "./fetchBridge";
 export * from "./httpApiBridge";
 export * from "./errors";
-export { IUserAgent } from "./userAgent";
+export { IUserAgent, UserAgent } from "./userAgent";

@@ -19,12 +19,12 @@ import * as fetchMock from "fetch-mock";
 import { ConjureError, ConjureErrorType } from "../../errors";
 import { IMPLEMENTATION_VERSION } from "../../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../../httpApiBridge";
-import { IUserAgent } from "../../userAgent";
+import { UserAgent } from "../../userAgent";
 import { FetchBridge } from "../fetchBridge";
 
 const baseUrl = "https://host.domain/path";
 const token = "TOKEN";
-const userAgent: IUserAgent = { productName: "foo", productVersion: "1.2.3" };
+const userAgent: UserAgent = new UserAgent({ productName: "foo", productVersion: "1.2.3" }, []);
 const ACCEPT_HEADER = "accept";
 
 interface IMockResponseObject {

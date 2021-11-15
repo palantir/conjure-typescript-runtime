@@ -18,7 +18,7 @@
 import { ConjureError, ConjureErrorType } from "../errors";
 import { IMPLEMENTATION_VERSION } from "../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
-import { IUserAgent, UserAgent } from "../userAgent";
+import { UserAgent } from "../userAgent";
 import { blobToReadableStream } from "./blobReadableStreamAdapter";
 
 export interface IFetchBody {
@@ -44,7 +44,7 @@ export interface IFetchBridgeParams {
      * All network requests will add this userAgent as a header param called 'Fetch-User-Agent'.
      * This will be logged in receiving service's request logs as params.User-Agent
      */
-    userAgent: IUserAgent;
+    userAgent: UserAgent;
     token?: string | Supplier<string>;
     fetch?: FetchFunction;
 }
@@ -61,9 +61,10 @@ export class FetchBridge implements IHttpApiBridge {
         this.getBaseUrl = typeof params.baseUrl === "function" ? params.baseUrl : () => params.baseUrl as string;
         this.getToken = typeof params.token === "function" ? params.token : () => params.token as string | undefined;
         this.fetch = params.fetch;
-        this.userAgent = new UserAgent(params.userAgent, [
-            { productName: "conjure-typescript-runtime", productVersion: IMPLEMENTATION_VERSION },
-        ]);
+        this.userAgent = params.userAgent.addAgent({
+            productName: "conjure-typescript-runtime",
+            productVersion: IMPLEMENTATION_VERSION,
+        });
     }
 
     public call<T>(

@@ -20,7 +20,7 @@ import * as http from "http";
 import * as nodeFetch from "node-fetch";
 import { TextDecoder, TextEncoder } from "util";
 import { IHttpApiBridge } from "../../httpApiBridge";
-import { IUserAgent } from "../../userAgent";
+import { UserAgent } from "../../userAgent";
 import { FetchBridge } from "../fetchBridge";
 import { ConjureService } from "./conjureService";
 import { nodeFetchStreamAdapter } from "./nodeFetchStreamAdapter";
@@ -36,7 +36,7 @@ describe("FetchBridgeImplServer", () => {
         const host = "localhost";
         const port = 9000;
         const baseUrl = `http://${host}:${port}`;
-        const userAgent: IUserAgent = { productName: "foo", productVersion: "1.2.3" };
+        const userAgent: UserAgent = new UserAgent({ productName: "foo", productVersion: "1.2.3" }, []);
         bridge = new FetchBridge({ baseUrl, token, fetch: nodeFetchStreamAdapter(nodeFetch), userAgent });
 
         app = express();
