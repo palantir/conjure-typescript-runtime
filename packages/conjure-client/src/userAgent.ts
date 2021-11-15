@@ -23,7 +23,7 @@ export interface IUserAgent {
 export class UserAgent {
     private readonly stringValue: string;
 
-    constructor(private readonly primary: IUserAgent, private readonly informational: IUserAgent[]) {
+    constructor(private readonly primary: IUserAgent, private readonly informational: IUserAgent[] = []) {
         this.stringValue = [this.primary, ...this.informational].map(formatUserAgent).join(" ");
     }
 

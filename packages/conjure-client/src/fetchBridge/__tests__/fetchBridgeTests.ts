@@ -24,7 +24,7 @@ import { FetchBridge } from "../fetchBridge";
 
 const baseUrl = "https://host.domain/path";
 const token = "TOKEN";
-const userAgent: UserAgent = new UserAgent({ productName: "foo", productVersion: "1.2.3" }, []);
+const userAgent: UserAgent = new UserAgent({ productName: "foo", productVersion: "1.2.3" });
 const ACCEPT_HEADER = "accept";
 
 interface IMockResponseObject {

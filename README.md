@@ -16,15 +16,15 @@ __Browser compatibility__: This library uses fetch so you should ensure that you
 ## Example
 
 ```typescript
-import { DefaultHttpApiBridge, MediaType } from "conjure-client";
+import { DefaultHttpApiBridge, MediaType, UserAgent } from "conjure-client";
 import { SomeService } from "some-conjure-api";
 
 const bridge = new DefaultHttpApiBridge({
     baseUrl: "https://some.base.url.com",
-    userAgent: {
+    userAgent: new UserAgent({
         productName: "yourProductName",
         productVersion: "1.0.0"
-    }
+    })
 })
 
 const service = new SomeService(bridge);

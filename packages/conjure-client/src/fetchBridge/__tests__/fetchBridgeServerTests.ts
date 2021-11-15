@@ -36,7 +36,7 @@ describe("FetchBridgeImplServer", () => {
         const host = "localhost";
         const port = 9000;
         const baseUrl = `http://${host}:${port}`;
-        const userAgent: UserAgent = new UserAgent({ productName: "foo", productVersion: "1.2.3" }, []);
+        const userAgent: UserAgent = new UserAgent({ productName: "foo", productVersion: "1.2.3" });
         bridge = new FetchBridge({ baseUrl, token, fetch: nodeFetchStreamAdapter(nodeFetch), userAgent });
 
         app = express();
