@@ -19,12 +19,12 @@ import * as fetchMock from "fetch-mock";
 import { ConjureError, ConjureErrorType } from "../../errors";
 import { IMPLEMENTATION_VERSION } from "../../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../../httpApiBridge";
-import { UserAgent } from "../../userAgent";
+import { IUserAgent } from "../../userAgent";
 import { FetchBridge } from "../fetchBridge";
 
 const baseUrl = "https://host.domain/path";
 const token = "TOKEN";
-const userAgent: UserAgent = new UserAgent({ productName: "foo", productVersion: "1.2.3" });
+const userAgent: IUserAgent = { productName: "foo", productVersion: "1.2.3" };
 const ACCEPT_HEADER = "accept";
 
 interface IMockResponseObject {
@@ -464,6 +464,18 @@ describe("FetchBridgeImpl", () => {
             expect(typedError.type).toBe(ConjureErrorType.Network);
             expect(typedError.originalError).toBeInstanceOf(TypeError);
         }
+    });
+
+    it("throws error if not user agents are provided", () => {
+        expect(
+            () =>
+                new FetchBridge({
+                    baseUrl,
+                    token,
+                    fetch: undefined,
+                    userAgent: [],
+                }),
+        ).toThrowError(new Error("Can not construct bridge: no user agents provided"));
     });
 });
 

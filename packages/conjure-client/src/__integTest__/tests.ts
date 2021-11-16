@@ -17,7 +17,6 @@
 
 import { assert } from "chai";
 import { FetchBridge } from "../fetchBridge";
-import { UserAgent } from "../userAgent";
 import { conjureVerificationServer } from "./__generated__";
 // HACKHACK to load test-cases
 // tslint:disable:no-var-requires
@@ -42,10 +41,10 @@ function isBlacklisted(endpointName: string, jsonString: string) {
 
 const bridge = new FetchBridge({
     baseUrl: "http://localhost:8000",
-    userAgent: new UserAgent({
+    userAgent: {
         productName: "conjure-typescript-runtime",
         productVersion: "0.0.0",
-    }),
+    },
 });
 
 describe("Body serde", () => {

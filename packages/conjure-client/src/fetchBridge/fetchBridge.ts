@@ -18,7 +18,7 @@
 import { ConjureError, ConjureErrorType } from "../errors";
 import { IMPLEMENTATION_VERSION } from "../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
-import { UserAgent } from "../userAgent";
+import { IUserAgent, UserAgent } from "../userAgent";
 import { blobToReadableStream } from "./blobReadableStreamAdapter";
 
 export interface IFetchBody {
@@ -44,7 +44,7 @@ export interface IFetchBridgeParams {
      * All network requests will add this userAgent as a header param called 'Fetch-User-Agent'.
      * This will be logged in receiving service's request logs as params.User-Agent
      */
-    userAgent: UserAgent;
+    userAgent: IUserAgent | IUserAgent[];
     token?: string | Supplier<string>;
     fetch?: FetchFunction;
 }
@@ -61,10 +61,23 @@ export class FetchBridge implements IHttpApiBridge {
         this.getBaseUrl = typeof params.baseUrl === "function" ? params.baseUrl : () => params.baseUrl as string;
         this.getToken = typeof params.token === "function" ? params.token : () => params.token as string | undefined;
         this.fetch = params.fetch;
-        this.userAgent = params.userAgent.addAgent({
+
+        const additionalUserAgent = {
             productName: "conjure-typescript-runtime",
             productVersion: IMPLEMENTATION_VERSION,
-        });
+        };
+        if (Array.isArray(params.userAgent)) {
+            const userAgents = params.userAgent;
+            if (userAgents.length === 0) {
+                throw new Error("Can not construct bridge: no user agents provided");
+            }
+            const primaryUserAgent = userAgents[0];
+            const informationUserAgents = userAgents.slice(1).concat(additionalUserAgent);
+
+            this.userAgent = new UserAgent(primaryUserAgent, informationUserAgents);
+        } else {
+            this.userAgent = new UserAgent(params.userAgent, [additionalUserAgent]);
+        }
     }
 
     public call<T>(
