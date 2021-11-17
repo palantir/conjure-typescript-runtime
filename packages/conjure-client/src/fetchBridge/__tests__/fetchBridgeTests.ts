@@ -475,7 +475,7 @@ describe("FetchBridgeImpl", () => {
                     fetch: undefined,
                     userAgent: [],
                 }),
-        ).toThrowError(new Error("Can not construct bridge: no user agents provided"));
+        ).toThrowError(new Error("At least one user agent must be provided"));
     });
 });
 

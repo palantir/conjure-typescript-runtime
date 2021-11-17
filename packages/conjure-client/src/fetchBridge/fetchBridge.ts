@@ -49,6 +49,11 @@ export interface IFetchBridgeParams {
     fetch?: FetchFunction;
 }
 
+const CONJURE_USER_AGENT = {
+    productName: "conjure-typescript-runtime",
+    productVersion: IMPLEMENTATION_VERSION,
+};
+
 export class FetchBridge implements IHttpApiBridge {
     private static ACCEPT_HEADER = "accept";
 
@@ -62,22 +67,11 @@ export class FetchBridge implements IHttpApiBridge {
         this.getToken = typeof params.token === "function" ? params.token : () => params.token as string | undefined;
         this.fetch = params.fetch;
 
-        const additionalUserAgent = {
-            productName: "conjure-typescript-runtime",
-            productVersion: IMPLEMENTATION_VERSION,
-        };
-        if (Array.isArray(params.userAgent)) {
-            const userAgents = params.userAgent;
-            if (userAgents.length === 0) {
-                throw new Error("Can not construct bridge: no user agents provided");
-            }
-            const primaryUserAgent = userAgents[0];
-            const informationUserAgents = userAgents.slice(1).concat(additionalUserAgent);
-
-            this.userAgent = new UserAgent(primaryUserAgent, informationUserAgents);
-        } else {
-            this.userAgent = new UserAgent(params.userAgent, [additionalUserAgent]);
+        const userAgents = Array.isArray(params.userAgent) ? params.userAgent : [params.userAgent];
+        if (userAgents.length === 0) {
+            throw new Error("At least one user agent must be provided");
         }
+        this.userAgent = new UserAgent([...userAgents, CONJURE_USER_AGENT]);
     }
 
     public call<T>(

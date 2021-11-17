@@ -26,12 +26,12 @@ export interface IUserAgent {
 export class UserAgent {
     private readonly stringValue: string;
 
-    constructor(private readonly primary: IUserAgent, private readonly informational: IUserAgent[]) {
-        this.stringValue = [this.primary, ...this.informational].map(formatUserAgent).join(" ");
+    constructor(private readonly agents: IUserAgent[]) {
+        this.stringValue = [...this.agents].map(formatUserAgent).join(" ");
     }
 
     public addAgent(agent: IUserAgent): UserAgent {
-        return new UserAgent(this.primary, [...this.informational, agent]);
+        return new UserAgent([...this.agents, agent]);
     }
 
     public toString() {
