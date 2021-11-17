@@ -44,10 +44,15 @@ export interface IFetchBridgeParams {
      * All network requests will add this userAgent as a header param called 'Fetch-User-Agent'.
      * This will be logged in receiving service's request logs as params.User-Agent
      */
-    userAgent: IUserAgent;
+    userAgent: IUserAgent | IUserAgent[];
     token?: string | Supplier<string>;
     fetch?: FetchFunction;
 }
+
+const CONJURE_USER_AGENT = {
+    productName: "conjure-typescript-runtime",
+    productVersion: IMPLEMENTATION_VERSION,
+};
 
 export class FetchBridge implements IHttpApiBridge {
     private static ACCEPT_HEADER = "accept";
@@ -61,9 +66,12 @@ export class FetchBridge implements IHttpApiBridge {
         this.getBaseUrl = typeof params.baseUrl === "function" ? params.baseUrl : () => params.baseUrl as string;
         this.getToken = typeof params.token === "function" ? params.token : () => params.token as string | undefined;
         this.fetch = params.fetch;
-        this.userAgent = new UserAgent(params.userAgent, [
-            { productName: "conjure-typescript-runtime", productVersion: IMPLEMENTATION_VERSION },
-        ]);
+
+        const userAgents = Array.isArray(params.userAgent) ? params.userAgent : [params.userAgent];
+        if (userAgents.length === 0) {
+            throw new Error("At least one user agent must be provided");
+        }
+        this.userAgent = new UserAgent([...userAgents, CONJURE_USER_AGENT]);
     }
 
     public call<T>(

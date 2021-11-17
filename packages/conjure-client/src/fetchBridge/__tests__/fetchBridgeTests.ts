@@ -465,6 +465,18 @@ describe("FetchBridgeImpl", () => {
             expect(typedError.originalError).toBeInstanceOf(TypeError);
         }
     });
+
+    it("throws error if not user agents are provided", () => {
+        expect(
+            () =>
+                new FetchBridge({
+                    baseUrl,
+                    token,
+                    fetch: undefined,
+                    userAgent: [],
+                }),
+        ).toThrowError(new Error("At least one user agent must be provided"));
+    });
 });
 
 interface ICreateFetchRequestOpts {
