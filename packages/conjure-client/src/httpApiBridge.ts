@@ -48,6 +48,9 @@ export interface IHttpEndpointOptions {
 
     /** return binary response as web stream */
     binaryAsStream?: boolean;
+
+    /** AbortSignal to allow the abortion of a fetch via an AbortController */
+    signal?: AbortSignal;
 }
 
 export enum MediaType {

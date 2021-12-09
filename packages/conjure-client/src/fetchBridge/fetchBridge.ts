@@ -157,7 +157,7 @@ export class FetchBridge implements IHttpApiBridge {
     private makeFetchCall(params: IHttpEndpointOptions): Promise<IFetchResponse> {
         const query = this.buildQueryString(params.queryArguments);
         const url = `${this.getBaseUrl()}/${this.buildPath(params)}${query.length > 0 ? `?${query}` : ""}`;
-        const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
+        const { data, headers = {}, method, requestMediaType, responseMediaType, signal } = params;
         const stringifiedHeaders: { [headerName: string]: string } = {
             "Fetch-User-Agent": this.userAgent.toString(),
         };
@@ -189,6 +189,10 @@ export class FetchBridge implements IHttpApiBridge {
             // If an endpoint can return multiple content types, make sure it returns the type that we're expecting
             // instead of the default `*/*
             (fetchRequestInit.headers as any)[FetchBridge.ACCEPT_HEADER] = responseMediaType;
+        }
+
+        if (signal != null) {
+            fetchRequestInit.signal = signal;
         }
 
         if (data != null) {

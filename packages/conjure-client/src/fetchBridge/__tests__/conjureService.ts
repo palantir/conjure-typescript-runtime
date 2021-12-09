@@ -34,6 +34,24 @@ export class ConjureService {
         });
     }
 
+    public abortedString(): Promise<string> {
+        const abortController = new AbortController();
+        const request = this.bridge.callEndpoint<string>({
+            data: undefined,
+            endpointName: "string",
+            endpointPath: "/string",
+            headers: {},
+            method: "GET",
+            pathArguments: [],
+            queryArguments: {},
+            requestMediaType: MediaType.APPLICATION_JSON,
+            responseMediaType: MediaType.APPLICATION_JSON,
+            signal: abortController.signal,
+        });
+        abortController.abort();
+        return request;
+    }
+
     public body(data: any): Promise<string> {
         return this.bridge.callEndpoint<string>({
             data,

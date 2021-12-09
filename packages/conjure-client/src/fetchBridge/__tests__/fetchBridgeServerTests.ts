@@ -80,6 +80,22 @@ describe("FetchBridgeImplServer", () => {
             .catch(fail);
     });
 
+    it("should abort requests once a provided AbortSignal has been enabled", done => {
+        app.all("/*", (_req, res) => {
+            res.status(200)
+                .type("application/json")
+                .send('"Hello, world!"');
+        });
+
+        new ConjureService(bridge)
+            .abortedString()
+            .then(fail)
+            .catch(e => {
+                expect(e.originalError.toString()).toContain("AbortError");
+                done();
+            });
+    });
+
     it("should receive JSON stringified payloads", done => {
         const payload = { dataset: "foo", count: 1 };
 
