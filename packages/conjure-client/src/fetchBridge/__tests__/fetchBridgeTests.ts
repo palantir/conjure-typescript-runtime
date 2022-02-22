@@ -55,6 +55,14 @@ describe("FetchBridgeImpl", () => {
         }, fetchResponse);
     }
 
+    function verifyFetchUserAgent() {
+        expect(fetchMock.calls.length).toBe(1);
+        const [, actualRequest] = fetchMock.lastCall();
+        // fetch-mock does not provide reasonable types here, the default type is Int8Array
+        const fetchUserAgent = (actualRequest.headers as any)["Fetch-User-Agent"];
+        expect(fetchUserAgent).toBe(`foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
+    }
+
     beforeEach(() => {
         bridge = new FetchBridge({ baseUrl, token, fetch: undefined, userAgent });
     });
@@ -476,6 +484,72 @@ describe("FetchBridgeImpl", () => {
                     userAgent: [],
                 }),
         ).toThrowError(new Error("At least one user agent must be provided"));
+    });
+
+    describe("sends correct Fetch-User-Agent", () => {
+        const request: IHttpEndpointOptions = {
+            endpointName: "a",
+            endpointPath: "a/{var}/b",
+            method: "GET",
+            pathArguments: ["val"],
+            queryArguments: {},
+            responseMediaType: MediaType.APPLICATION_JSON,
+        };
+
+        beforeEach(() => {
+            // Mocking all requests as we're only interested in request headers
+            fetchMock.mock(() => true, {});
+        });
+
+        it("for user agent", async () => {
+            const fetchBridge = new FetchBridge({ baseUrl, token, fetch: undefined, userAgent });
+
+            await fetchBridge.callEndpoint(request);
+
+            verifyFetchUserAgent();
+        });
+
+        it("for user agent array", async () => {
+            const fetchBridge = new FetchBridge({ baseUrl, token, fetch: undefined, userAgent: [userAgent] });
+
+            await fetchBridge.callEndpoint(request);
+
+            verifyFetchUserAgent();
+        });
+
+        it("for user agent supplier array", async () => {
+            const fetchBridge = new FetchBridge({ baseUrl, token, fetch: undefined, userAgent: [() => userAgent] });
+
+            await fetchBridge.callEndpoint(request);
+
+            verifyFetchUserAgent();
+        });
+
+        it("for changing user agent", async () => {
+            const userAgentSupplier = jest
+                .fn()
+                .mockImplementationOnce(() => {
+                    return { productName: "foo", productVersion: "1.2.3" };
+                })
+                .mockImplementationOnce(() => {
+                    return { productName: "bar", productVersion: "4.5.6" };
+                });
+            const fetchBridge = new FetchBridge({ baseUrl, token, fetch: undefined, userAgent: [userAgentSupplier] });
+
+            await fetchBridge.callEndpoint(request);
+            await fetchBridge.callEndpoint(request);
+
+            const matchedRequests = fetchMock.calls().matched;
+            expect(matchedRequests.length).toBe(2);
+
+            const [, firstActualRequest] = matchedRequests[0];
+            const firstUserAgent = (firstActualRequest.headers as any)["Fetch-User-Agent"];
+            expect(firstUserAgent).toBe(`foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
+
+            const [, secondActualRequest] = matchedRequests[1];
+            const secondActualAgent = (secondActualRequest.headers as any)["Fetch-User-Agent"];
+            expect(secondActualAgent).toBe(`bar/4.5.6 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
+        });
     });
 });
 

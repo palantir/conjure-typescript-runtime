@@ -44,7 +44,7 @@ export interface IFetchBridgeParams {
      * All network requests will add this userAgent as a header param called 'Fetch-User-Agent'.
      * This will be logged in receiving service's request logs as params.User-Agent
      */
-    userAgent: IUserAgent | IUserAgent[];
+    userAgent: IUserAgent | IUserAgent[] | Array<Supplier<IUserAgent>>;
     token?: string | Supplier<string>;
     fetch?: FetchFunction;
 }
@@ -60,7 +60,7 @@ export class FetchBridge implements IHttpApiBridge {
     private readonly getBaseUrl: Supplier<string>;
     private readonly getToken: Supplier<string | undefined>;
     private readonly fetch: FetchFunction | undefined;
-    private readonly userAgent: UserAgent;
+    private readonly userAgentSuppliers: Array<Supplier<IUserAgent>>;
 
     constructor(params: IFetchBridgeParams) {
         this.getBaseUrl = typeof params.baseUrl === "function" ? params.baseUrl : () => params.baseUrl as string;
@@ -71,7 +71,15 @@ export class FetchBridge implements IHttpApiBridge {
         if (userAgents.length === 0) {
             throw new Error("At least one user agent must be provided");
         }
-        this.userAgent = new UserAgent([...userAgents, CONJURE_USER_AGENT]);
+        this.userAgentSuppliers = [];
+        for (const ua of userAgents) {
+            if (typeof ua === "function") {
+                this.userAgentSuppliers.push(ua);
+            } else {
+                this.userAgentSuppliers.push(() => ua);
+            }
+        }
+        this.userAgentSuppliers.push(() => CONJURE_USER_AGENT);
     }
 
     public call<T>(
@@ -159,7 +167,7 @@ export class FetchBridge implements IHttpApiBridge {
         const url = `${this.getBaseUrl()}/${this.buildPath(params)}${query.length > 0 ? `?${query}` : ""}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
         const stringifiedHeaders: { [headerName: string]: string } = {
-            "Fetch-User-Agent": this.userAgent.toString(),
+            "Fetch-User-Agent": this.getUserAgent().toString(),
         };
 
         // Only send present headers as strings
@@ -198,6 +206,10 @@ export class FetchBridge implements IHttpApiBridge {
         const fetchFunction = this.fetch || fetch;
 
         return fetchFunction(url, fetchRequestInit);
+    }
+
+    private getUserAgent(): UserAgent {
+        return new UserAgent(this.userAgentSuppliers.map(uaSupplier => uaSupplier()));
     }
 
     private handleBinaryResponseBody(response: IFetchResponse): ReadableStream<Uint8Array> {
