@@ -401,7 +401,7 @@ describe("FetchBridgeImpl", () => {
             await bridge.callEndpoint(request);
             fail("Did not throw an error");
         } catch (error) {
-            expect(error.message).toBe("Unrecognized request media type " + unrecognizedType);
+            expect(error.originalError.message).toBe("Unrecognized request media type " + unrecognizedType);
         }
     });
 
