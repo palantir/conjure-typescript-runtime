@@ -332,6 +332,27 @@ describe("FetchBridgeImpl", () => {
         await expect(bridge.callEndpoint(request)).resolves.toBeUndefined();
     });
 
+    it("passes async tokens", async () => {
+        const tokenProvider: () => Promise<string> = jest.fn().mockReturnValueOnce(Promise.resolve(token));
+        bridge = new FetchBridge({ baseUrl, token: tokenProvider, fetch: undefined, userAgent });
+
+        const request: IHttpEndpointOptions = {
+            endpointName: "a",
+            endpointPath: "a/",
+            method: "GET",
+            pathArguments: [],
+            queryArguments: {},
+        };
+        const expectedUrl = `${baseUrl}/a/`;
+        const expectedFetchRequest = createFetchRequest({
+            method: "GET",
+            responseMediaType: request.responseMediaType,
+        });
+        const expectedFetchResponse = createFetchResponse(undefined, 204);
+        mockFetch(expectedUrl, expectedFetchRequest, expectedFetchResponse);
+        await expect(bridge.callEndpoint(request)).resolves.toBeUndefined();
+    });
+
     it("passes headers", async () => {
         const request: IHttpEndpointOptions = {
             endpointName: "a",
@@ -380,7 +401,7 @@ describe("FetchBridgeImpl", () => {
             await bridge.callEndpoint(request);
             fail("Did not throw an error");
         } catch (error) {
-            expect(error.message).toBe("Unrecognized request media type " + unrecognizedType);
+            expect(error.originalError.message).toBe("Unrecognized request media type " + unrecognizedType);
         }
     });
 

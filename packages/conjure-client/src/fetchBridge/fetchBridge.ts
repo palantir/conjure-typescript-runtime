@@ -45,7 +45,7 @@ export interface IFetchBridgeParams {
      * This will be logged in receiving service's request logs as params.User-Agent
      */
     userAgent: IUserAgent | IUserAgent[] | Array<Supplier<IUserAgent>>;
-    token?: string | Supplier<string>;
+    token?: string | Supplier<string> | Supplier<Promise<string>>;
     fetch?: FetchFunction;
 }
 
@@ -58,7 +58,7 @@ export class FetchBridge implements IHttpApiBridge {
     private static ACCEPT_HEADER = "accept";
 
     private readonly getBaseUrl: Supplier<string>;
-    private readonly getToken: Supplier<string | undefined>;
+    private readonly getToken: Supplier<string | Promise<string> | undefined>;
     private readonly fetch: FetchFunction | undefined;
     private readonly userAgentSuppliers: Array<Supplier<IUserAgent>>;
 
@@ -162,7 +162,7 @@ export class FetchBridge implements IHttpApiBridge {
         }
     }
 
-    private makeFetchCall(params: IHttpEndpointOptions): Promise<IFetchResponse> {
+    private async makeFetchCall(params: IHttpEndpointOptions): Promise<IFetchResponse> {
         const query = this.buildQueryString(params.queryArguments);
         const url = `${this.getBaseUrl()}/${this.buildPath(params)}${query.length > 0 ? `?${query}` : ""}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
@@ -184,7 +184,7 @@ export class FetchBridge implements IHttpApiBridge {
             method,
         };
 
-        const token = this.getToken();
+        const token = await this.getToken();
         if (token !== undefined) {
             fetchRequestInit.headers = { ...fetchRequestInit.headers, Authorization: `Bearer ${token}` };
         }
