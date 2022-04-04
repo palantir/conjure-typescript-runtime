@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ConjureError, ConjureErrorType } from "../error";
+import { ConjureError, ConjureErrorType, isConjureError } from "../error";
 
 const body = {
     errorCode: "NOT_FOUND",
@@ -70,5 +70,23 @@ describe("ConjureError", () => {
                 ),
             );
         });
+    });
+});
+
+describe("isConjureError", () => {
+    it("handles null errors", () => {
+        expect(isConjureError(null)).toBe(false);
+    });
+
+    it("handles undefined errors", () => {
+        expect(isConjureError(undefined)).toBe(false);
+    });
+
+    it("handles non-Conjure errors", () => {
+        expect(isConjureError(new Error("I'm an error"))).toBe(false);
+    });
+
+    it("handles Conjure errors", () => {
+        expect(isConjureError(new ConjureError(ConjureErrorType.Status, undefined, 400, body))).toBe(true);
     });
 });

@@ -49,9 +49,20 @@ export class ConjureError<E> {
     }
 }
 
-export function isConjureError(error: any): error is ConjureError<never> {
+export function isConjureError(error: unknown): error is ConjureError<never> {
+    if (error == null) {
+        return false;
+    }
+
+    if (error instanceof ConjureError) {
+        return true;
+    }
+
+    const errorPrototype = Object.getPrototypeOf(error);
+
     return (
-        error instanceof ConjureError ||
-        (error.__proto__ && error.__proto__.constructor && error.__proto__.constructor.name === ConjureError.name)
+        errorPrototype != null &&
+        errorPrototype.constructor != null &&
+        errorPrototype.constructor.name === ConjureError.name
     );
 }
