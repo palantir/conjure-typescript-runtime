@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-import "web-streams-polyfill";
-
 export function blobToReadableStream(blobPromise: Promise<Blob>): ReadableStream<Uint8Array> {
     return new ReadableStream({
         start: controller => {
