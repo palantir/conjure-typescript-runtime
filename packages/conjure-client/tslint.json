@@ -7,6 +7,9 @@
     "file-header": [true,
       "Copyright \\d{4} Palantir Technologies, Inc."
     ],
+    "no-submodule-imports": {
+        "options": ["web-streams-polyfill/ponyfill"]
+    },
     "object-literal-sort-keys": false
   },
   "linterOptions": {

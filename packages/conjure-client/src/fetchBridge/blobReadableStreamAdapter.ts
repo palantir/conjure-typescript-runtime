@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
-import "web-streams-polyfill";
+import { ReadableStream as PonyfilledReadableStream } from "web-streams-polyfill/ponyfill";
 
-export function blobToReadableStream(blobPromise: Promise<Blob>): ReadableStream<Uint8Array> {
-    return new ReadableStream({
-        start: controller => {
+export function blobToReadableStream(
+    blobPromise: Promise<Blob>,
+): ReadableStream<Uint8Array> | PonyfilledReadableStream<Uint8Array> {
+    const underlyingSource = {
+        start: (controller: ReadableStreamDefaultController<Uint8Array>) => {
             const reader = new FileReader();
             reader.onload = () => {
                 controller.enqueue(new Uint8Array(reader.result as ArrayBuffer));
@@ -29,5 +31,8 @@ export function blobToReadableStream(blobPromise: Promise<Blob>): ReadableStream
             };
             blobPromise.then(blob => reader.readAsArrayBuffer(blob));
         },
-    });
+    };
+    return typeof ReadableStream === "undefined"
+        ? new PonyfilledReadableStream<Uint8Array>(underlyingSource)
+        : new ReadableStream(underlyingSource);
 }

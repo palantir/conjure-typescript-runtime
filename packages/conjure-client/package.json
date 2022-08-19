@@ -15,7 +15,7 @@
     "downloadTestServer": "./scripts/download-test-server.sh",
     "generateSpecBindings": "./scripts/generate-test-bindings.sh",
     "lint": "tslint 'src/**/*.ts*' --project ./src/tsconfig.json",
-    "lint-fix": "lint --fix",
+    "lint-fix": "yarn lint --fix",
     "test": "yarn downloadConjureTypeScript && yarn downloadTestServer && yarn generateSpecBindings && npm-run-all test:unit test:integration",
     "test:integration": "./scripts/run-integration-tests.sh",
     "test:unit": "jest --config ./jest.config.js --rootDir ./",
