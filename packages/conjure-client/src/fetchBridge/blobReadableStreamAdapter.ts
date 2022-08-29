@@ -17,9 +17,7 @@
 
 import { ReadableStream as PonyfilledReadableStream } from "web-streams-polyfill/ponyfill";
 
-export function blobToReadableStream(
-    blobPromise: Promise<Blob>,
-): ReadableStream<Uint8Array> | PonyfilledReadableStream<Uint8Array> {
+export function blobToReadableStream(blobPromise: Promise<Blob>): ReadableStream<Uint8Array> {
     const underlyingSource = {
         start: (controller: ReadableStreamDefaultController<Uint8Array>) => {
             const reader = new FileReader();
@@ -33,6 +31,6 @@ export function blobToReadableStream(
         },
     };
     return typeof ReadableStream === "undefined"
-        ? new PonyfilledReadableStream<Uint8Array>(underlyingSource)
+        ? ((new PonyfilledReadableStream<Uint8Array>(underlyingSource) as unknown) as ReadableStream<Uint8Array>)
         : new ReadableStream(underlyingSource);
 }
