@@ -31,6 +31,6 @@ export function blobToReadableStream(blobPromise: Promise<Blob>): ReadableStream
         },
     };
     return typeof ReadableStream === "undefined"
-        ? ((new PonyfilledReadableStream<Uint8Array>(underlyingSource) as unknown) as ReadableStream<Uint8Array>)
+        ? (new PonyfilledReadableStream<Uint8Array>(underlyingSource) as ReadableStream<Uint8Array>)
         : new ReadableStream(underlyingSource);
 }
