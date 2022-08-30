@@ -54,6 +54,6 @@
     "url": "git@github.com:palantir/conjure-typescript-runtime.git"
   },
   "dependencies": {
-    "web-streams-polyfill": "^2.0.6"
+    "web-streams-polyfill": "^3.2.1"
   }
 }
