@@ -227,8 +227,8 @@ describe("FetchBridgeImpl", () => {
     it("makes POST request with url encoded form data", async () => {
         const request: IHttpEndpointOptions = {
             data: {
-                param1: "a",
-                param2: ["b", "c"],
+                "param1": "a",
+                "param2": ["b", "c"],
                 "param=3": "ürl-êñçódèd",
             },
             endpointName: "a",
@@ -590,7 +590,7 @@ function createFetchRequest(opts: ICreateFetchRequestOpts): RequestInit {
         credentials: "same-origin",
         headers: {
             ...headers,
-            Authorization: `Bearer ${token}`,
+            "Authorization": `Bearer ${token}`,
             "Fetch-User-Agent": `foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`,
         },
         method,
