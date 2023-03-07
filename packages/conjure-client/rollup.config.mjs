@@ -19,7 +19,7 @@ export default {
       values: {
         "process.env.MODERN": "true",
       },
-      preventAssignment: true
+      preventAssignment: true,
     }),
   ],
 };
