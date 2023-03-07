@@ -212,7 +212,7 @@ export class FetchBridge implements IHttpApiBridge {
         return new UserAgent(this.userAgentSuppliers.map(uaSupplier => uaSupplier()));
     }
 
-    private handleBinaryResponseBody(response: IFetchResponse): ReadableStream<Uint8Array> {
+    private async handleBinaryResponseBody(response: IFetchResponse): Promise<ReadableStream<Uint8Array>> {
         if (response.body === null) {
             return blobToReadableStream(response.blob());
         } else {

@@ -114,7 +114,7 @@ describe("RetryingFetch", () => {
             originalSetTimeout(callback, timeout);
             return 0;
         });
-        window.setTimeout = mockedSetTimeout;
+        window.setTimeout = mockedSetTimeout as any;
 
         await retryingFetch.fetch(expectedUrl, expectedFetchRequest);
         expect(mockedSetTimeout.mock.calls[0][1]).toEqual(2000);
