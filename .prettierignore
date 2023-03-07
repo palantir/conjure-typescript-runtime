@@ -7,3 +7,4 @@ lib-modern/
 *.yml
 changelog/
 *.js
+packages/conjure-client/src/generated
