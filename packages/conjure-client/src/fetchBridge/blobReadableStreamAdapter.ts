@@ -31,8 +31,7 @@ export function blobToReadableStream(blobPromise: Promise<Blob>): Promise<Readab
         },
     };
     if (process.env.MODERN) {
-        // We must cast here so we can stay on ancient typescript version 3.x!
-        return blobPromise.then(blob => (blob as any).stream());
+        return blobPromise.then(blob => blob.stream());
     } else {
         return Promise.resolve(
             typeof ReadableStream === "undefined"
