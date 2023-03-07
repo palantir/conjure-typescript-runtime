@@ -10,7 +10,8 @@
     "no-submodule-imports": {
         "options": ["web-streams-polyfill/ponyfill"]
     },
-    "object-literal-sort-keys": false
+    "object-literal-sort-keys": false,
+    "prettier": false
   },
   "linterOptions": {
     "exclude": ["src/generated/*"]
