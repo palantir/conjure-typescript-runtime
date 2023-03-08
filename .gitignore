@@ -3,6 +3,7 @@ Thumbs.db
 .vscode/
 *.log
 lib
+lib-*/
 node_modules
 coverage
 
