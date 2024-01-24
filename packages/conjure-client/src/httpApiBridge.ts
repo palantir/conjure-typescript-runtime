@@ -35,7 +35,7 @@ export interface IHttpEndpointOptions {
     requestMediaType?: MediaType;
 
     /** MIME type of the expected server response, often "application/json" or "application/octet-stream" */
-    responseMediaType?: MediaType;
+    responseMediaType?: string;
 
     /** Values to be interpolated into the endpointPath. */
     pathArguments: any[];
