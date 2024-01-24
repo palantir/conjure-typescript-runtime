@@ -126,12 +126,14 @@ export class FetchBridge implements IHttpApiBridge {
 
             const contentType =
                 response.headers.get("Content-Type") != null ? (response.headers.get("Content-Type") as string) : "";
-            if (contentType.includes(MediaType.APPLICATION_OCTET_STREAM) && params.binaryAsStream) {
+            if ((contentType.includes(MediaType.APPLICATION_OCTET_STREAM) || params.forceBinaryResponseBody) && params.binaryAsStream) {
                 return this.handleBinaryResponseBody(response) as any;
             }
 
             let bodyPromise;
-            if (contentType.includes(MediaType.APPLICATION_JSON)) {
+            if (params.forceBinaryResponseBody) {
+                bodyPromise = response.blob();
+            } else if (contentType.includes(MediaType.APPLICATION_JSON)) {
                 bodyPromise = response.json();
             } else if (contentType.includes(MediaType.APPLICATION_OCTET_STREAM)) {
                 bodyPromise = response.blob();

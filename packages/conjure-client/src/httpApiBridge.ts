@@ -48,6 +48,9 @@ export interface IHttpEndpointOptions {
 
     /** return binary response as web stream */
     binaryAsStream?: boolean;
+
+    /** Force binary response body. Recommended to use this together with `responseMediaType`. */
+    forceBinaryResponseBody?: boolean;
 }
 
 export enum MediaType {
