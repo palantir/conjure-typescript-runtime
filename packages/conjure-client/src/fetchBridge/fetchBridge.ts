@@ -300,19 +300,10 @@ export class FetchBridge implements IHttpApiBridge {
     }
 
     private isBinaryMedia(contentType: string): boolean {
-        if (contentType.includes("image/")) {
-            return true;
-        }
-
-        if (contentType.includes("audio/")) {
-            return true;
-        }
-
-        if (contentType.includes("video/")) {
-            return true;
-        }
-
         return (
+            contentType.includes("image/") ||
+            contentType.includes("audio/") ||
+            contentType.includes("video/") ||
             contentType.includes("application/pdf") ||
             contentType.includes("application/dicom") ||
             contentType.includes("application/vnd.nitf")
