@@ -126,14 +126,17 @@ export class FetchBridge implements IHttpApiBridge {
 
             const contentType =
                 response.headers.get("Content-Type") != null ? (response.headers.get("Content-Type") as string) : "";
-            if (contentType.includes(MediaType.APPLICATION_OCTET_STREAM) && params.binaryAsStream) {
+            if (
+                (contentType.includes(MediaType.APPLICATION_OCTET_STREAM) || this.isBinaryMedia(contentType)) &&
+                params.binaryAsStream
+            ) {
                 return this.handleBinaryResponseBody(response) as any;
             }
 
             let bodyPromise;
             if (contentType.includes(MediaType.APPLICATION_JSON)) {
                 bodyPromise = response.json();
-            } else if (contentType.includes(MediaType.APPLICATION_OCTET_STREAM)) {
+            } else if (contentType.includes(MediaType.APPLICATION_OCTET_STREAM) || this.isBinaryMedia(contentType)) {
                 bodyPromise = response.blob();
             } else {
                 bodyPromise = response.text();
@@ -294,5 +297,16 @@ export class FetchBridge implements IHttpApiBridge {
         }
         // TODO(forozco): use safe errors
         throw new Error("Unexpected media type " + value);
+    }
+
+    private isBinaryMedia(contentType: string): boolean {
+        return (
+            contentType.includes("image/") ||
+            contentType.includes("audio/") ||
+            contentType.includes("video/") ||
+            contentType.includes("application/pdf") ||
+            contentType.includes("application/dicom") ||
+            contentType.includes("application/vnd.nitf")
+        );
     }
 }
