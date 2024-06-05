@@ -49,7 +49,7 @@ export class ConjureError<E> {
     }
 }
 
-export function isConjureError(error: unknown): error is ConjureError<never> {
+export function isConjureError(error: unknown): error is ConjureError<unknown> {
     if (error == null) {
         return false;
     }
