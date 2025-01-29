@@ -56,7 +56,9 @@ describe("FetchBridgeImpl", () => {
         }, fetchResponse);
     }
 
-    function verifyFetchUserAgent(expectedUserAgent: string = `foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`) {
+    function verifyFetchUserAgent(
+        expectedUserAgent: string = `foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`,
+    ) {
         expect(fetchMock.calls.length).toBe(1);
         const [, actualRequest] = fetchMock.lastCall();
         // fetch-mock does not provide reasonable types here, the default type is Int8Array
@@ -548,7 +550,12 @@ describe("FetchBridgeImpl", () => {
         });
 
         it("for array of user agent suppliers that return an array", async () => {
-            const fetchBridge = new FetchBridge({ baseUrl, token, fetch: undefined, userAgent: [() => [userAgent, userAgent2]] });
+            const fetchBridge = new FetchBridge({
+                baseUrl,
+                token,
+                fetch: undefined,
+                userAgent: [() => [userAgent, userAgent2]],
+            });
 
             await fetchBridge.callEndpoint(request);
 
