@@ -26,6 +26,7 @@ const baseUrl = "https://host.domain/path";
 const token = "TOKEN";
 const userAgent: IUserAgent = { productName: "foo", productVersion: "1.2.3" };
 const userAgent2: IUserAgent = { productName: "bar", productVersion: "1.2.3" };
+const userAgent3: IUserAgent = { productName: "baz", productVersion: "1.2.3" };
 const ACCEPT_HEADER = "accept";
 
 interface IMockResponseObject {
@@ -549,17 +550,17 @@ describe("FetchBridgeImpl", () => {
             verifyFetchUserAgent();
         });
 
-        it("for array of user agent suppliers that return an array", async () => {
+        it("for array of user agent suppliers where some return an array", async () => {
             const fetchBridge = new FetchBridge({
                 baseUrl,
                 token,
                 fetch: undefined,
-                userAgent: [() => [userAgent, userAgent2]],
+                userAgent: [() => [userAgent, userAgent2], () => userAgent3],
             });
 
             await fetchBridge.callEndpoint(request);
 
-            verifyFetchUserAgent(`foo/1.2.3 bar/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
+            verifyFetchUserAgent(`foo/1.2.3 bar/1.2.3 baz/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
         });
 
         it("for changing user agent", async () => {
