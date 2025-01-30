@@ -44,7 +44,7 @@ export interface IFetchBridgeParams {
      * All network requests will add this userAgent as a header param called 'Fetch-User-Agent'.
      * This will be logged in receiving service's request logs as params.User-Agent
      */
-    userAgent: IUserAgent | IUserAgent[] | Array<Supplier<IUserAgent>>;
+    userAgent: IUserAgent | ReadonlyArray<IUserAgent | Supplier<IUserAgent | IUserAgent[]>>;
     token?: string | Supplier<string> | Supplier<Promise<string>>;
     fetch?: FetchFunction;
 }
@@ -60,7 +60,7 @@ export class FetchBridge implements IHttpApiBridge {
     private readonly getBaseUrl: Supplier<string>;
     private readonly getToken: Supplier<string | Promise<string> | undefined>;
     private readonly fetch: FetchFunction | undefined;
-    private readonly userAgentSuppliers: Array<Supplier<IUserAgent>>;
+    private readonly userAgentSuppliers: Array<Supplier<IUserAgent | IUserAgent[]>>;
 
     constructor(params: IFetchBridgeParams) {
         this.getBaseUrl = typeof params.baseUrl === "function" ? params.baseUrl : () => params.baseUrl as string;
@@ -212,7 +212,18 @@ export class FetchBridge implements IHttpApiBridge {
     }
 
     private getUserAgent(): UserAgent {
-        return new UserAgent(this.userAgentSuppliers.map(uaSupplier => uaSupplier()));
+        return new UserAgent(
+            this.userAgentSuppliers
+                .map(uaSupplier => uaSupplier())
+                .reduce((uas: IUserAgent[], ua) => {
+                    if (Array.isArray(ua)) {
+                        uas.push(...ua);
+                    } else {
+                        uas.push(ua);
+                    }
+                    return uas;
+                }, []),
+        );
     }
 
     private async handleBinaryResponseBody(response: IFetchResponse): Promise<ReadableStream<Uint8Array>> {
