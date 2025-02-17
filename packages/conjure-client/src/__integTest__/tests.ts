@@ -44,6 +44,7 @@ const bridge = new FetchBridge({
     userAgent: {
         productName: "conjure-typescript-runtime",
         productVersion: "0.0.0",
+        comments: ["some-comment"],
     },
 });
 

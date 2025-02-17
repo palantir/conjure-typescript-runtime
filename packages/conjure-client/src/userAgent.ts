@@ -18,6 +18,18 @@
 export interface IUserAgent {
     productName: string;
     productVersion: string;
+    /**
+     * [rfc7231 section-5.5.3](https://datatracker.ietf.org/doc/html/rfc7231#section-5.5.3) comment
+     * metadata (as described by
+     * [rfc7230 section-3.2.6](https://datatracker.ietf.org/doc/html/rfc7230#section-3.2.6"))
+     * for additional diagnostic information.
+     *
+     * Note that this library provides a much stricter set of allowed
+     * characters within comments than the linked RFCs to reduce complexity.
+     *
+     * Allowed characters: "a-zA-Z0-9.-:_/ "
+     */
+    comments?: string[];
 }
 
 /**
@@ -40,6 +52,10 @@ export class UserAgent {
 }
 
 function formatUserAgent(userAgent: IUserAgent): string {
-    const { productName, productVersion } = userAgent;
-    return `${productName}/${productVersion}`;
+    const { productName, productVersion, comments } = userAgent;
+    let formattedUserAgent = `${productName}/${productVersion}`;
+    if (comments != null && comments.length > 0) {
+        formattedUserAgent += " (" + comments.join("; ") + ")";
+    }
+    return formattedUserAgent;
 }
