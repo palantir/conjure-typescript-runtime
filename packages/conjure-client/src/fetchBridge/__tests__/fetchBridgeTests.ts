@@ -563,6 +563,32 @@ describe("FetchBridgeImpl", () => {
             verifyFetchUserAgent(`foo/1.2.3 bar/1.2.3 baz/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
         });
 
+        it("for a user agent with comments", async () => {
+            const fetchBridge = new FetchBridge({
+                baseUrl,
+                token,
+                fetch: undefined,
+                userAgent: { productName: "foo", productVersion: "1.2.3", comments: ["comment1", "comment2"] },
+            });
+
+            await fetchBridge.callEndpoint(request);
+
+            verifyFetchUserAgent(`foo/1.2.3 (comment1; comment2) conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
+        });
+
+        it("for a user agent with empty coments", async () => {
+            const fetchBridge = new FetchBridge({
+                baseUrl,
+                token,
+                fetch: undefined,
+                userAgent: { productName: "foo", productVersion: "1.2.3", comments: [] },
+            });
+
+            await fetchBridge.callEndpoint(request);
+
+            verifyFetchUserAgent(`foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
+        });
+
         it("for changing user agent", async () => {
             const userAgentSupplier = jest
                 .fn()
