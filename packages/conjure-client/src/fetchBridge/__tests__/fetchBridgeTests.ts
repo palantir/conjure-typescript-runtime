@@ -25,6 +25,8 @@ import { FetchBridge } from "../fetchBridge";
 const baseUrl = "https://host.domain/path";
 const token = "TOKEN";
 const userAgent: IUserAgent = { productName: "foo", productVersion: "1.2.3" };
+const userAgent2: IUserAgent = { productName: "bar", productVersion: "1.2.3" };
+const userAgent3: IUserAgent = { productName: "baz", productVersion: "1.2.3" };
 const ACCEPT_HEADER = "accept";
 
 interface IMockResponseObject {
@@ -55,12 +57,14 @@ describe("FetchBridgeImpl", () => {
         }, fetchResponse);
     }
 
-    function verifyFetchUserAgent() {
+    function verifyFetchUserAgent(
+        expectedUserAgent: string = `foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`,
+    ) {
         expect(fetchMock.calls.length).toBe(1);
         const [, actualRequest] = fetchMock.lastCall();
         // fetch-mock does not provide reasonable types here, the default type is Int8Array
         const fetchUserAgent = (actualRequest.headers as any)["Fetch-User-Agent"];
-        expect(fetchUserAgent).toBe(`foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
+        expect(fetchUserAgent).toBe(expectedUserAgent);
     }
 
     beforeEach(() => {
@@ -544,6 +548,45 @@ describe("FetchBridgeImpl", () => {
             await fetchBridge.callEndpoint(request);
 
             verifyFetchUserAgent();
+        });
+
+        it("for array of user agent suppliers where some return an array", async () => {
+            const fetchBridge = new FetchBridge({
+                baseUrl,
+                token,
+                fetch: undefined,
+                userAgent: [() => [userAgent, userAgent2], () => userAgent3],
+            });
+
+            await fetchBridge.callEndpoint(request);
+
+            verifyFetchUserAgent(`foo/1.2.3 bar/1.2.3 baz/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
+        });
+
+        it("for a user agent with comments", async () => {
+            const fetchBridge = new FetchBridge({
+                baseUrl,
+                token,
+                fetch: undefined,
+                userAgent: { productName: "foo", productVersion: "1.2.3", comments: ["comment1", "comment2"] },
+            });
+
+            await fetchBridge.callEndpoint(request);
+
+            verifyFetchUserAgent(`foo/1.2.3 (comment1; comment2) conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
+        });
+
+        it("for a user agent with empty coments", async () => {
+            const fetchBridge = new FetchBridge({
+                baseUrl,
+                token,
+                fetch: undefined,
+                userAgent: { productName: "foo", productVersion: "1.2.3", comments: [] },
+            });
+
+            await fetchBridge.callEndpoint(request);
+
+            verifyFetchUserAgent(`foo/1.2.3 conjure-typescript-runtime/${IMPLEMENTATION_VERSION}`);
         });
 
         it("for changing user agent", async () => {
