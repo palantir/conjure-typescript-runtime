@@ -16,19 +16,15 @@
  */
 
 // tslint:disable-next-line:interface-over-type-literal
-export type Success<T> = {
+export type ConjureSuccess<T> = {
     readonly status: "success";
-    readonly response: T;
+    readonly result: T;
 };
 
 // tslint:disable-next-line:interface-over-type-literal
-export type Failure<E> = {
+export type ConjureFailure<E> = {
     readonly status: "failure";
-    readonly error: E;
+    readonly failure: E;
 };
 
-export type Result<T, E> = Success<T> | Failure<E>;
-
-export const isSuccess = <T, E>(result: Result<T, E>): result is Success<T> => result.status === "success";
-
-export const isFailure = <T, E>(result: Result<T, E>): result is Failure<E> => result.status === "failure";
+export type ConjureResult<T, E> = ConjureSuccess<T> | ConjureFailure<E>;
