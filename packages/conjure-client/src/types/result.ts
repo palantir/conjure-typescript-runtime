@@ -24,7 +24,7 @@ export type ConjureSuccess<T> = {
 // tslint:disable-next-line:interface-over-type-literal
 export type ConjureFailure<E> = {
     readonly status: "failure";
-    readonly failure: E;
+    readonly error: E;
 };
 
 export type ConjureResult<T, E> = ConjureSuccess<T> | ConjureFailure<E>;
