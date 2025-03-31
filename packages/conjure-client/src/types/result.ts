@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import { ConjureError } from "../errors";
+
 // tslint:disable-next-line:interface-over-type-literal
 export type ConjureSuccess<T> = {
     readonly status: "success";
@@ -24,7 +26,7 @@ export type ConjureSuccess<T> = {
 // tslint:disable-next-line:interface-over-type-literal
 export type ConjureFailure<E> = {
     readonly status: "failure";
-    readonly error: E;
+    readonly error: ConjureError<E>;
 };
 
 export type ConjureResult<T, E> = ConjureSuccess<T> | ConjureFailure<E>;
