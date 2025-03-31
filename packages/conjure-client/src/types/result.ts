@@ -17,14 +17,33 @@
 
 import { ConjureError } from "../errors";
 
-export interface ConjureSuccess<T> {
-    readonly status: "success";
-    readonly result: T;
+/**
+ * Represents a successful operation result with an associated type.
+ * 
+ * @template T - The type of the result.
+ * @property {T} result - The result of the successful operation.
+ */
+export interface IConjureSuccess<T> {
+  readonly status: "success";
+  readonly result: T;
 };
 
-export interface ConjureFailure<E> {
-    readonly status: "failure";
-    readonly error: ConjureError<E>;
+/**
+ * Represents a failed operation result with an associated error.
+ * 
+ * @template E - The type of the error(s).
+ * @property {ConjureError<E>} error - The error of the failed operation.
+ */
+export interface IConjureFailure<E> {
+  readonly status: "failure";
+  readonly error: ConjureError<E>;
 };
 
-export type ConjureResult<T, E> = ConjureSuccess<T> | ConjureFailure<E>;
+/**
+ * Represents the result of an operation that can either be a success or a failure.
+ * 
+ * @template T - The type of the success result.
+ * @template E - The type of the error(s).
+ * @type {IConjureSuccess<T> | IConjureFailure<E>}
+ */
+export type IConjureResult<T, E> = IConjureSuccess<T> | IConjureFailure<E>;
