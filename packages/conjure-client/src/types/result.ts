@@ -17,14 +17,12 @@
 
 import { ConjureError } from "../errors";
 
-// tslint:disable-next-line:interface-over-type-literal
-export type ConjureSuccess<T> = {
+export interface ConjureSuccess<T> {
     readonly status: "success";
     readonly result: T;
 };
 
-// tslint:disable-next-line:interface-over-type-literal
-export type ConjureFailure<E> = {
+export interface ConjureFailure<E> {
     readonly status: "failure";
     readonly error: ConjureError<E>;
 };
