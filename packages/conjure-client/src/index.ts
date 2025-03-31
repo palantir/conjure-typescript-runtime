@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-export { FetchBridge as DefaultHttpApiBridge } from "./fetchBridge";
-export * from "./fetchBridge";
-export * from "./httpApiBridge";
 export * from "./errors";
+export * from "./fetchBridge";
+export { FetchBridge as DefaultHttpApiBridge } from "./fetchBridge";
+export * from "./httpApiBridge";
+export { IConjureFailure, IConjureResult, IConjureSuccess } from "./types/result";
 export { IUserAgent } from "./userAgent";
