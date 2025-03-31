@@ -19,5 +19,5 @@ export * from "./errors";
 export * from "./fetchBridge";
 export { FetchBridge as DefaultHttpApiBridge } from "./fetchBridge";
 export * from "./httpApiBridge";
-export { ConjureFailure, ConjureResult, ConjureSuccess } from "./types/result";
+export { IConjureFailure, IConjureResult, IConjureSuccess } from "./types/result";
 export { IUserAgent } from "./userAgent";
