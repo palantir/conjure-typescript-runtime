@@ -317,7 +317,10 @@ export class FetchBridge implements IHttpApiBridge {
             contentType.includes("video/") ||
             contentType.includes("application/pdf") ||
             contentType.includes("application/dicom") ||
-            contentType.includes("application/vnd.nitf")
+            contentType.includes("application/vnd.nitf") ||
+            contentType.includes("application/vnd.openxmlformats-officedocument.presentationml") ||
+            contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml") ||
+            contentType.includes("application/vnd.openxmlformats-officedocument.wordprocessingml")
         );
     }
 }
