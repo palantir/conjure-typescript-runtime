@@ -146,7 +146,7 @@ export class FetchBridge implements IHttpApiBridge {
             try {
                 body = await bodyPromise;
             } catch (error) {
-                throw new ConjureError(ConjureErrorType.Parse, error, response.status);
+                throw new ConjureError(ConjureErrorType.Parse, error, response.status, undefined, response.headers);
             }
 
             if (!response.ok) {
