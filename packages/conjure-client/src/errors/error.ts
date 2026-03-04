@@ -27,18 +27,21 @@ export class ConjureError<E> {
     public readonly originalError?: any;
     public readonly status?: number;
     public readonly body?: string | E;
+    public readonly headers?: Headers;
 
-    constructor(errorType: ConjureErrorType, originalError?: any, status?: number, body?: string | E) {
+    constructor(errorType: ConjureErrorType, originalError?: any, status?: number, body?: string | E, headers?: Headers) {
         this.type = errorType;
         this.originalError = originalError;
         this.status = status;
         this.body = body;
+        this.headers = headers;
     }
 
     public toString() {
         return JSON.stringify(
             {
                 body: this.body,
+                headers: this.getHeadersObject(),
                 originalError: this.originalError && this.originalError.toString(),
                 status: this.status,
                 type: this.type,
@@ -46,6 +49,18 @@ export class ConjureError<E> {
             null,
             "  ",
         );
+    }
+
+    private getHeadersObject(): Record<string, string> | undefined {
+        if (this.headers == null) {
+            return;
+        }
+
+        const headersObj: Record<string, string> = {};
+        this.headers.forEach((value, key) => {
+            headersObj[key] = value;
+        });
+        return headersObj;
     }
 }
 

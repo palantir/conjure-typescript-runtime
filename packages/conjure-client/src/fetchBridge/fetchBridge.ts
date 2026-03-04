@@ -150,7 +150,7 @@ export class FetchBridge implements IHttpApiBridge {
             }
 
             if (!response.ok) {
-                throw new ConjureError(ConjureErrorType.Status, undefined, response.status, body);
+                throw new ConjureError(ConjureErrorType.Status, undefined, response.status, body, response.headers);
             }
 
             return body;

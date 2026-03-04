@@ -44,6 +44,24 @@ describe("ConjureError", () => {
             );
         });
 
+        it("stringifies the headers, and includes the status and type", () => {
+            const headers = new Headers({
+                "qos-retry-hint": "do-not-retry"
+            });
+            const error = new ConjureError(ConjureErrorType.Status, undefined, 400, undefined, headers);
+            expect(removeSpaces(error.toString())).toEqual(
+                removeSpaces(
+                    `{
+                        "headers": {
+                            "qos-retry-hint": "do-not-retry"
+                        },
+                        "status": 400,
+                        "type": "STATUS"
+                    }`,
+                ),
+            );
+        });
+
         it("uses the default string conversion for the originalError, if an originalError is defined", () => {
             const originalError = {
                 toString: () => "I'm an error",
