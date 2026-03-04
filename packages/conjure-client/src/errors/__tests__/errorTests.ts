@@ -46,7 +46,7 @@ describe("ConjureError", () => {
 
         it("stringifies the headers, and includes the status and type", () => {
             const headers = new Headers({
-                "qos-retry-hint": "do-not-retry"
+                "qos-retry-hint": "do-not-retry",
             });
             const error = new ConjureError(ConjureErrorType.Status, undefined, 400, undefined, headers);
             expect(removeSpaces(error.toString())).toEqual(

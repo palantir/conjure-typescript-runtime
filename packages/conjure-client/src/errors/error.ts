@@ -29,7 +29,13 @@ export class ConjureError<E> {
     public readonly body?: string | E;
     public readonly headers?: Headers;
 
-    constructor(errorType: ConjureErrorType, originalError?: any, status?: number, body?: string | E, headers?: Headers) {
+    constructor(
+        errorType: ConjureErrorType,
+        originalError?: any,
+        status?: number,
+        body?: string | E,
+        headers?: Headers,
+    ) {
         this.type = errorType;
         this.originalError = originalError;
         this.status = status;
