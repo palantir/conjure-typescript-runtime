@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+const QOS_RETRY_HINT_HEADER = "QoS-Retry-Hint";
+
 export enum ConjureErrorType {
     Network = "NETWORK",
     Other = "OTHER",
@@ -40,7 +42,18 @@ export class ConjureError<E> {
         this.originalError = originalError;
         this.status = status;
         this.body = body;
-        this.headers = headers;
+
+        if (headers == null) {
+            this.headers = headers;
+            return;
+        }
+
+        const conjureHeaders = new Headers();
+        const qosRetryHint = headers.get(QOS_RETRY_HINT_HEADER);
+        if (qosRetryHint != null) {
+            conjureHeaders.set(QOS_RETRY_HINT_HEADER, qosRetryHint);
+        }
+        this.headers = conjureHeaders;
     }
 
     public toString() {

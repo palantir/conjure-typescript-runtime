@@ -44,11 +44,14 @@ describe("ConjureError", () => {
             );
         });
 
-        it("stringifies the headers, and includes the status and type", () => {
+        it("propagates known conjure headers, and includes the status and type", () => {
             const headers = new Headers({
                 "qos-retry-hint": "do-not-retry",
+                "other": "header",
             });
             const error = new ConjureError(ConjureErrorType.Status, undefined, 400, undefined, headers);
+            expect(error.headers?.get("qos-retry-hint")).toEqual("do-not-retry");
+            expect(error.headers?.get("other")).toBeNull();
             expect(removeSpaces(error.toString())).toEqual(
                 removeSpaces(
                     `{
