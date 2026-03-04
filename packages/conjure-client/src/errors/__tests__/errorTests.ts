@@ -53,6 +53,7 @@ describe("ConjureError", () => {
             });
             const error = new ConjureError(ConjureErrorType.Status, undefined, 400, undefined, headers);
             expect(error.headers?.get("qos-retry-hint")).toEqual("do-not-retry");
+            expect(error.headers?.get("qos-due-to")).toEqual("custom");
             expect(error.headers?.get("other")).toBeNull();
             expect(removeSpaces(error.toString())).toEqual(
                 removeSpaces(
