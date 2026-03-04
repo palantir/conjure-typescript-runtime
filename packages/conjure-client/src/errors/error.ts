@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-const QOS_RETRY_HINT_HEADER = "QoS-Retry-Hint";
+const CONJURE_HEADERS = ["QoS-Retry-Hint", "QoS-Due-To"];
 
 export enum ConjureErrorType {
     Network = "NETWORK",
@@ -43,16 +43,13 @@ export class ConjureError<E> {
         this.status = status;
         this.body = body;
 
-        if (headers == null) {
-            this.headers = headers;
-            return;
-        }
-
         const conjureHeaders = new Headers();
-        const qosRetryHint = headers.get(QOS_RETRY_HINT_HEADER);
-        if (qosRetryHint != null) {
-            conjureHeaders.set(QOS_RETRY_HINT_HEADER, qosRetryHint);
-        }
+        CONJURE_HEADERS.forEach(conjureHeaderKey => {
+            const conjureHeaderValue = headers?.get(conjureHeaderKey);
+            if (conjureHeaderValue != null) {
+                conjureHeaders.set(conjureHeaderKey, conjureHeaderValue);
+            }
+        });
         this.headers = conjureHeaders;
     }
 

@@ -37,6 +37,7 @@ describe("ConjureError", () => {
                             "errorCode": "NOT_FOUND",
                             "message": "Refer to the server logs"
                         },
+                        "headers": {},
                         "status": 400,
                         "type": "STATUS"
                     }`,
@@ -47,6 +48,7 @@ describe("ConjureError", () => {
         it("propagates known conjure headers, and includes the status and type", () => {
             const headers = new Headers({
                 "qos-retry-hint": "do-not-retry",
+                "qos-due-to": "custom",
                 "other": "header",
             });
             const error = new ConjureError(ConjureErrorType.Status, undefined, 400, undefined, headers);
@@ -56,7 +58,8 @@ describe("ConjureError", () => {
                 removeSpaces(
                     `{
                         "headers": {
-                            "qos-retry-hint": "do-not-retry"
+                            "qos-retry-hint": "do-not-retry",
+                            "qos-due-to": "custom"
                         },
                         "status": 400,
                         "type": "STATUS"
@@ -73,6 +76,7 @@ describe("ConjureError", () => {
             expect(removeSpaces(error.toString())).toEqual(
                 removeSpaces(
                     `{
+                        "headers": {},
                         "originalError": "I'm an error",
                         "status": 400,
                         "type": "STATUS"
@@ -86,6 +90,7 @@ describe("ConjureError", () => {
             expect(removeSpaces(error.toString())).toEqual(
                 removeSpaces(
                     `{
+                        "headers": {},
                         "type": "STATUS"
                     }`,
                 ),
