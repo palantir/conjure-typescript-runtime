@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-const CONJURE_HEADERS = ["QoS-Retry-Hint", "QoS-Due-To"];
+export const QOS_RETRY_HINT = "QoS-Retry-Hint";
+export const QOS_DUE_TO = "QoS-Due-To";
+
+export interface QoSMetadata {
+    [QOS_RETRY_HINT]?: string;
+    [QOS_DUE_TO]?: string;
+}
 
 export enum ConjureErrorType {
     Network = "NETWORK",
@@ -29,54 +35,34 @@ export class ConjureError<E> {
     public readonly originalError?: any;
     public readonly status?: number;
     public readonly body?: string | E;
-    public readonly headers?: Headers;
+    public readonly qos?: QoSMetadata;
 
     constructor(
         errorType: ConjureErrorType,
         originalError?: any,
         status?: number,
         body?: string | E,
-        headers?: Headers,
+        qos?: QoSMetadata,
     ) {
         this.type = errorType;
         this.originalError = originalError;
         this.status = status;
         this.body = body;
-
-        const conjureHeaders = new Headers();
-        CONJURE_HEADERS.forEach(conjureHeaderKey => {
-            const conjureHeaderValue = headers?.get(conjureHeaderKey);
-            if (conjureHeaderValue != null) {
-                conjureHeaders.set(conjureHeaderKey, conjureHeaderValue);
-            }
-        });
-        this.headers = conjureHeaders;
+        this.qos = qos;
     }
 
     public toString() {
         return JSON.stringify(
             {
                 body: this.body,
-                headers: this.getHeadersObject(),
                 originalError: this.originalError && this.originalError.toString(),
+                qos: this.qos,
                 status: this.status,
                 type: this.type,
             },
             null,
             "  ",
         );
-    }
-
-    private getHeadersObject(): Record<string, string> | undefined {
-        if (this.headers == null) {
-            return;
-        }
-
-        const headersObj: Record<string, string> = {};
-        this.headers.forEach((value, key) => {
-            headersObj[key] = value;
-        });
-        return headersObj;
     }
 }
 

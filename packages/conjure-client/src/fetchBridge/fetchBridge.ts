@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ConjureError, ConjureErrorType } from "../errors";
+import { ConjureError, ConjureErrorType, QOS_DUE_TO, QOS_RETRY_HINT, QoSMetadata } from "../errors";
 import { IMPLEMENTATION_VERSION } from "../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
 import { IUserAgent, UserAgent } from "../userAgent";
@@ -146,11 +146,23 @@ export class FetchBridge implements IHttpApiBridge {
             try {
                 body = await bodyPromise;
             } catch (error) {
-                throw new ConjureError(ConjureErrorType.Parse, error, response.status, undefined, response.headers);
+                throw new ConjureError(
+                    ConjureErrorType.Parse,
+                    error,
+                    response.status,
+                    undefined,
+                    this.getQoSMetadataFromHeaders(response.headers),
+                );
             }
 
             if (!response.ok) {
-                throw new ConjureError(ConjureErrorType.Status, undefined, response.status, body, response.headers);
+                throw new ConjureError(
+                    ConjureErrorType.Status,
+                    undefined,
+                    response.status,
+                    body,
+                    this.getQoSMetadataFromHeaders(response.headers),
+                );
             }
 
             return body;
@@ -224,6 +236,13 @@ export class FetchBridge implements IHttpApiBridge {
                     return uas;
                 }, []),
         );
+    }
+
+    private getQoSMetadataFromHeaders(headers: Headers): QoSMetadata {
+        return {
+            [QOS_RETRY_HINT]: headers.get(QOS_RETRY_HINT) ?? undefined,
+            [QOS_DUE_TO]: headers.get(QOS_DUE_TO) ?? undefined,
+        };
     }
 
     private async handleBinaryResponseBody(response: IFetchResponse): Promise<ReadableStream<Uint8Array>> {

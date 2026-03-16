@@ -37,7 +37,6 @@ describe("ConjureError", () => {
                             "errorCode": "NOT_FOUND",
                             "message": "Refer to the server logs"
                         },
-                        "headers": {},
                         "status": 400,
                         "type": "STATUS"
                     }`,
@@ -45,22 +44,17 @@ describe("ConjureError", () => {
             );
         });
 
-        it("propagates known conjure headers, and includes the status and type", () => {
-            const headers = new Headers({
-                "qos-retry-hint": "do-not-retry",
-                "qos-due-to": "custom",
-                "other": "header",
+        it("propagates QoS metadata, and includes the status and type", () => {
+            const error = new ConjureError(ConjureErrorType.Status, undefined, 400, undefined, {
+                "QoS-Due-To": "custom",
+                "QoS-Retry-Hint": "do-not-retry",
             });
-            const error = new ConjureError(ConjureErrorType.Status, undefined, 400, undefined, headers);
-            expect(error.headers?.get("qos-retry-hint")).toEqual("do-not-retry");
-            expect(error.headers?.get("qos-due-to")).toEqual("custom");
-            expect(error.headers?.get("other")).toBeNull();
             expect(removeSpaces(error.toString())).toEqual(
                 removeSpaces(
                     `{
-                        "headers": {
-                            "qos-retry-hint": "do-not-retry",
-                            "qos-due-to": "custom"
+                        "qos": {
+                            "QoS-Due-To": "custom",
+                            "QoS-Retry-Hint": "do-not-retry"
                         },
                         "status": 400,
                         "type": "STATUS"
@@ -77,7 +71,6 @@ describe("ConjureError", () => {
             expect(removeSpaces(error.toString())).toEqual(
                 removeSpaces(
                     `{
-                        "headers": {},
                         "originalError": "I'm an error",
                         "status": 400,
                         "type": "STATUS"
@@ -91,7 +84,6 @@ describe("ConjureError", () => {
             expect(removeSpaces(error.toString())).toEqual(
                 removeSpaces(
                     `{
-                        "headers": {},
                         "type": "STATUS"
                     }`,
                 ),
