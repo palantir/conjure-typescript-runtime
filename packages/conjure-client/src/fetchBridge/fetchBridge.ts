@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
-import { ConjureError, ConjureErrorType, IQoSMetadata, QOS_DUE_TO, QOS_RETRY_HINT } from "../errors";
+import { ConjureError, ConjureErrorType, IQoSMetadata } from "../errors";
 import { IMPLEMENTATION_VERSION } from "../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
 import { IUserAgent, UserAgent } from "../userAgent";
 import { blobToReadableStream } from "./blobReadableStreamAdapter";
+
+const QOS_RETRY_HINT_HEADER = "QoS-Retry-Hint";
+const QOS_DUE_TO_HEADER = "QoS-Due-To";
 
 export interface IFetchBody {
     json(): Promise<any>;
@@ -240,8 +243,8 @@ export class FetchBridge implements IHttpApiBridge {
 
     private getQoSMetadataFromHeaders(headers: Headers): IQoSMetadata {
         return {
-            [QOS_RETRY_HINT]: headers.get(QOS_RETRY_HINT) ?? undefined,
-            [QOS_DUE_TO]: headers.get(QOS_DUE_TO) ?? undefined,
+            retryHint: headers.get(QOS_RETRY_HINT_HEADER) ?? undefined,
+            dueTo: headers.get(QOS_DUE_TO_HEADER) ?? undefined,
         };
     }
 

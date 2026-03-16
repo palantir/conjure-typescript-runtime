@@ -46,15 +46,15 @@ describe("ConjureError", () => {
 
         it("propagates QoS metadata, and includes the status and type", () => {
             const error = new ConjureError(ConjureErrorType.Status, undefined, 400, undefined, {
-                "QoS-Due-To": "custom",
-                "QoS-Retry-Hint": "do-not-retry",
+                dueTo: "custom",
+                retryHint: "do-not-retry",
             });
             expect(removeSpaces(error.toString())).toEqual(
                 removeSpaces(
                     `{
                         "qos": {
-                            "QoS-Due-To": "custom",
-                            "QoS-Retry-Hint": "do-not-retry"
+                            "dueTo": "custom",
+                            "retryHint": "do-not-retry"
                         },
                         "status": 400,
                         "type": "STATUS"
