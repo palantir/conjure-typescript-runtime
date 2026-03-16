@@ -18,7 +18,7 @@
 export const QOS_RETRY_HINT = "QoS-Retry-Hint";
 export const QOS_DUE_TO = "QoS-Due-To";
 
-export interface QoSMetadata {
+export interface IQoSMetadata {
     [QOS_RETRY_HINT]?: string;
     [QOS_DUE_TO]?: string;
 }

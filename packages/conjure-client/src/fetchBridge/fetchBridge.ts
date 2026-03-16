@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ConjureError, ConjureErrorType, QOS_DUE_TO, QOS_RETRY_HINT, QoSMetadata } from "../errors";
+import { ConjureError, ConjureErrorType, QOS_DUE_TO, QOS_RETRY_HINT, IQoSMetadata } from "../errors";
 import { IMPLEMENTATION_VERSION } from "../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
 import { IUserAgent, UserAgent } from "../userAgent";
@@ -238,7 +238,7 @@ export class FetchBridge implements IHttpApiBridge {
         );
     }
 
-    private getQoSMetadataFromHeaders(headers: Headers): QoSMetadata {
+    private getQoSMetadataFromHeaders(headers: Headers): IQoSMetadata {
         return {
             [QOS_RETRY_HINT]: headers.get(QOS_RETRY_HINT) ?? undefined,
             [QOS_DUE_TO]: headers.get(QOS_DUE_TO) ?? undefined,
