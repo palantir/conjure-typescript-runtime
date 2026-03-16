@@ -44,6 +44,25 @@ describe("ConjureError", () => {
             );
         });
 
+        it("propagates QoS metadata, and includes the status and type", () => {
+            const error = new ConjureError(ConjureErrorType.Status, undefined, 400, undefined, {
+                dueTo: "custom",
+                retryHint: "do-not-retry",
+            });
+            expect(removeSpaces(error.toString())).toEqual(
+                removeSpaces(
+                    `{
+                        "qos": {
+                            "dueTo": "custom",
+                            "retryHint": "do-not-retry"
+                        },
+                        "status": 400,
+                        "type": "STATUS"
+                    }`,
+                ),
+            );
+        });
+
         it("uses the default string conversion for the originalError, if an originalError is defined", () => {
             const originalError = {
                 toString: () => "I'm an error",

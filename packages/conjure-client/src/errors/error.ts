@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+export interface IQoSMetadata {
+    retryHint?: string;
+    dueTo?: string;
+}
+
 export enum ConjureErrorType {
     Network = "NETWORK",
     Other = "OTHER",
@@ -27,12 +32,20 @@ export class ConjureError<E> {
     public readonly originalError?: any;
     public readonly status?: number;
     public readonly body?: string | E;
+    public readonly qos?: IQoSMetadata;
 
-    constructor(errorType: ConjureErrorType, originalError?: any, status?: number, body?: string | E) {
+    constructor(
+        errorType: ConjureErrorType,
+        originalError?: any,
+        status?: number,
+        body?: string | E,
+        qos?: IQoSMetadata,
+    ) {
         this.type = errorType;
         this.originalError = originalError;
         this.status = status;
         this.body = body;
+        this.qos = qos;
     }
 
     public toString() {
@@ -40,6 +53,7 @@ export class ConjureError<E> {
             {
                 body: this.body,
                 originalError: this.originalError && this.originalError.toString(),
+                qos: this.qos,
                 status: this.status,
                 type: this.type,
             },

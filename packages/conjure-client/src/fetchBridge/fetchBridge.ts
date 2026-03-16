@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
-import { ConjureError, ConjureErrorType } from "../errors";
+import { ConjureError, ConjureErrorType, IQoSMetadata } from "../errors";
 import { IMPLEMENTATION_VERSION } from "../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
 import { IUserAgent, UserAgent } from "../userAgent";
 import { blobToReadableStream } from "./blobReadableStreamAdapter";
+
+const QOS_RETRY_HINT_HEADER = "QoS-Retry-Hint";
+const QOS_DUE_TO_HEADER = "QoS-Due-To";
 
 export interface IFetchBody {
     json(): Promise<any>;
@@ -146,11 +149,23 @@ export class FetchBridge implements IHttpApiBridge {
             try {
                 body = await bodyPromise;
             } catch (error) {
-                throw new ConjureError(ConjureErrorType.Parse, error, response.status);
+                throw new ConjureError(
+                    ConjureErrorType.Parse,
+                    error,
+                    response.status,
+                    undefined,
+                    this.getQoSMetadataFromHeaders(response.headers),
+                );
             }
 
             if (!response.ok) {
-                throw new ConjureError(ConjureErrorType.Status, undefined, response.status, body);
+                throw new ConjureError(
+                    ConjureErrorType.Status,
+                    undefined,
+                    response.status,
+                    body,
+                    this.getQoSMetadataFromHeaders(response.headers),
+                );
             }
 
             return body;
@@ -224,6 +239,13 @@ export class FetchBridge implements IHttpApiBridge {
                     return uas;
                 }, []),
         );
+    }
+
+    private getQoSMetadataFromHeaders(headers: Headers): IQoSMetadata {
+        return {
+            retryHint: headers.get(QOS_RETRY_HINT_HEADER) ?? undefined,
+            dueTo: headers.get(QOS_DUE_TO_HEADER) ?? undefined,
+        };
     }
 
     private async handleBinaryResponseBody(response: IFetchResponse): Promise<ReadableStream<Uint8Array>> {
