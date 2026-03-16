@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ConjureError, ConjureErrorType, QOS_DUE_TO, QOS_RETRY_HINT, IQoSMetadata } from "../errors";
+import { ConjureError, ConjureErrorType, IQoSMetadata, QOS_DUE_TO, QOS_RETRY_HINT } from "../errors";
 import { IMPLEMENTATION_VERSION } from "../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
 import { IUserAgent, UserAgent } from "../userAgent";
