@@ -35,14 +35,14 @@ export class ConjureError<E> {
     public readonly originalError?: any;
     public readonly status?: number;
     public readonly body?: string | E;
-    public readonly qos?: QoSMetadata;
+    public readonly qos?: IQoSMetadata;
 
     constructor(
         errorType: ConjureErrorType,
         originalError?: any,
         status?: number,
         body?: string | E,
-        qos?: QoSMetadata,
+        qos?: IQoSMetadata,
     ) {
         this.type = errorType;
         this.originalError = originalError;
