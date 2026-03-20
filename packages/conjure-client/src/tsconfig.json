@@ -18,7 +18,7 @@
     "sourceMap": true,
     "strict": true,
     "stripInternal": true,
-    "target": "es5",
+    "target": "es2019",
     "outDir": "../lib"
   },
   "exclude": [
