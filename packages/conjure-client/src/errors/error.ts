@@ -28,20 +28,15 @@ export enum ConjureErrorType {
 }
 
 /**
- * Brand stamped on every {@link ConjureError} instance so {@link isConjureError} can recognise errors
- * thrown by a *different* copy of conjure-client on the page (e.g. a bundling/dedupe miss), where
- * `instanceof` fails because each copy defines its own `ConjureError` class.
- *
- * It uses `Symbol.for` (the runtime-global symbol registry) rather than `Symbol()` so that every copy
- * resolves this key to the *same* symbol; a plain class-name string would instead be unreliable because
- * minifiers rename classes. Being a symbol, it is also skipped by `JSON.stringify`, `Object.keys`, and
- * `for...in`, so it never leaks into serialized output.
+ * Lets {@link isConjureError} recognise errors from a different copy of conjure-client on the page, where
+ * `instanceof` fails because each copy defines its own `ConjureError` class. `Symbol.for` resolves to the
+ * same symbol across copies; see
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/for.
  */
 const CONJURE_ERROR_BRAND = Symbol.for("com.palantir.conjure.ConjureError");
 
 export class ConjureError<E> {
-    // Brands the prototype so isConjureError can detect ConjureErrors from other copies of the library,
-    // without stamping a symbol onto (and cluttering) every instance.
+    // On the prototype rather than the instance, so the brand doesn't clutter every instance.
     public get [CONJURE_ERROR_BRAND](): true {
         return true;
     }
@@ -86,21 +81,18 @@ export function isConjureError(error: unknown): error is ConjureError<unknown> {
         return false;
     }
 
-    // Common case, and the cheapest check: an error from this same copy of the library, matched by its
-    // prototype. Tried first because the cross-copy paths below can only ever add to this result.
+    // Fast path: an error from this same copy of the library.
     if (error instanceof ConjureError) {
         return true;
     }
 
-    // A duplicate copy of the library defines its own `ConjureError` class, so the `instanceof` above
-    // can't see its instances; the shared brand is what lets us recognise them. (See CONJURE_ERROR_BRAND.)
+    // An error from a different copy of the library, recognised by the shared brand. (See CONJURE_ERROR_BRAND.)
     if (typeof error === "object" && CONJURE_ERROR_BRAND in error && error[CONJURE_ERROR_BRAND] === true) {
         return true;
     }
 
-    // Back-compat for errors from copies of conjure-client that predate the brand: fall back to matching
-    // the class name. This is brittle (minifiers mangle class names) and can go once every producer
-    // emits the brand.
+    // Back-compat for copies that predate the brand: match the class name. Brittle (minifiers mangle names)
+    // and removable once every producer emits the brand.
     const errorPrototype = Object.getPrototypeOf(error);
 
     return (
