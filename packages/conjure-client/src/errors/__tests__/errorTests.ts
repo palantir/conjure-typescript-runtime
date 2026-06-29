@@ -108,4 +108,23 @@ describe("isConjureError", () => {
     it("handles Conjure errors", () => {
         expect(isConjureError(new ConjureError(ConjureErrorType.Status, undefined, 400, body))).toBe(true);
     });
+
+    it("brands instances with the global registry symbol", () => {
+        const brand = Symbol.for("com.palantir.conjure.ConjureError");
+        const error: object = new ConjureError(ConjureErrorType.Status, undefined, 400, body);
+        expect(brand in error && error[brand] === true).toBe(true);
+    });
+
+    it("handles Conjure errors thrown by a duplicate copy of conjure-client", () => {
+        // Simulate an error produced by a second, duplicate copy of this library: it carries the
+        // shared registry brand but is neither `instanceof` our ConjureError nor named "ConjureError",
+        // so only the brand check can recognise it.
+        const fromDuplicateCopy = {
+            [Symbol.for("com.palantir.conjure.ConjureError")]: true,
+            type: ConjureErrorType.Status,
+            body,
+        };
+        expect(fromDuplicateCopy instanceof ConjureError).toBe(false);
+        expect(isConjureError(fromDuplicateCopy)).toBe(true);
+    });
 });
