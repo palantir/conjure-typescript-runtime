@@ -32,12 +32,15 @@ export enum ConjureErrorType {
  * `instanceof` fails because each copy defines its own `ConjureError` class. `Symbol.for` resolves to the
  * same symbol across copies; see
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/for.
+ *
+ * The `"instanceof "` prefix makes the symbol self-describing: an object carrying it reads as
+ * "instanceof com.palantir.conjure.ConjureError", i.e. it declares itself to be a `ConjureError`.
  */
-const CONJURE_ERROR_BRAND = Symbol.for("com.palantir.conjure.ConjureError");
+const IS_CONJURE_ERROR_SYMBOL = Symbol.for("instanceof com.palantir.conjure.ConjureError");
 
 export class ConjureError<E> {
     // On the prototype rather than the instance, so the brand doesn't clutter every instance.
-    public get [CONJURE_ERROR_BRAND](): true {
+    public get [IS_CONJURE_ERROR_SYMBOL](): true {
         return true;
     }
 
@@ -86,13 +89,13 @@ export function isConjureError(error: unknown): error is ConjureError<unknown> {
         return true;
     }
 
-    // An error from a different copy of the library, recognised by the shared brand. (See CONJURE_ERROR_BRAND.)
-    if (typeof error === "object" && CONJURE_ERROR_BRAND in error && error[CONJURE_ERROR_BRAND] === true) {
+    // An error from a different copy of the library, recognised by the shared brand. (See IS_CONJURE_ERROR_SYMBOL.)
+    if (typeof error === "object" && IS_CONJURE_ERROR_SYMBOL in error && error[IS_CONJURE_ERROR_SYMBOL] === true) {
         return true;
     }
 
-    // Back-compat for copies that predate the brand: match the class name. Brittle (minifiers mangle names)
-    // and removable once every producer emits the brand.
+    // Back-compat for an older conjure-client version on the page that predates the brand: match the class
+    // name. Brittle (minifiers mangle names) and removable in a major version.
     const errorPrototype = Object.getPrototypeOf(error);
 
     return (
