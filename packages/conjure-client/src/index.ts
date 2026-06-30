@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+export * from "./deserialize/deserialize";
+export * from "./deserialize/types";
 export * from "./errors";
 export * from "./fetchBridge";
 export { FetchBridge as DefaultHttpApiBridge } from "./fetchBridge";
