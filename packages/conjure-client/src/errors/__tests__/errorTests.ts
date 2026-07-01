@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ConjureError, ConjureErrorType, isConjureError } from "../error";
+import { ConjureError, ConjureErrorType, IS_CONJURE_ERROR_KEY, isConjureError } from "../error";
 
 const body = {
     errorCode: "NOT_FOUND",
@@ -107,5 +107,38 @@ describe("isConjureError", () => {
 
     it("handles Conjure errors", () => {
         expect(isConjureError(new ConjureError(ConjureErrorType.Status, undefined, 400, body))).toBe(true);
+    });
+
+    it("stamps an own, enumerable string brand (the shape a structured clone copies)", () => {
+        const error = new ConjureError(ConjureErrorType.Status, undefined, 400, body);
+        expect(Object.getOwnPropertyDescriptor(error, IS_CONJURE_ERROR_KEY)).toMatchObject({
+            value: true,
+            enumerable: true,
+        });
+        expect(Object.keys(error)).toContain(IS_CONJURE_ERROR_KEY);
+    });
+
+    it("recognises a Conjure error from a duplicate copy of conjure-client, or one that crossed a Worker", () => {
+        // A different copy's ConjureError is not `instanceof` ours and is not named "ConjureError" after
+        // minification; a structured-cloned error additionally has no prototype at all. In every case only
+        // the shared, clone-surviving string brand can recognise it.
+        const branded = {
+            [IS_CONJURE_ERROR_KEY]: true,
+            type: ConjureErrorType.Status,
+            body,
+        };
+        expect(branded instanceof ConjureError).toBe(false);
+        expect(isConjureError(branded)).toBe(true);
+    });
+
+    // structuredClone is the same algorithm postMessage uses; only available in some environments (Node 17+,
+    // modern browsers), so guard it. jsdom (the test environment) does not provide it.
+    const itClones = typeof structuredClone === "function" ? it : it.skip;
+    itClones("recognises a Conjure error after an actual structuredClone (Worker survival)", () => {
+        const clone = structuredClone(new ConjureError(ConjureErrorType.Status, undefined, 400, body));
+        // The brand survives the clone, but the prototype does not: the result is data-only, not a live
+        // ConjureError (no `toString()`, not `instanceof`). isConjureError still reports true.
+        expect(clone instanceof ConjureError).toBe(false);
+        expect(isConjureError(clone)).toBe(true);
     });
 });

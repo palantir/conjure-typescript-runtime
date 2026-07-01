@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ConjureError } from "../errors";
+import { ConjureError } from "../errors/error";
 
 /**
  * Represents a successful operation result with an associated type.
