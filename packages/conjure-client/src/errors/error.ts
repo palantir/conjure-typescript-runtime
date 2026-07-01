@@ -35,7 +35,7 @@ export enum ConjureErrorType {
  * necessarily surfaces in `JSON.stringify`, `Object.keys`, spread and `for...in`. The `"instanceof "` prefix
  * makes a branded object self-describing.
  */
-const IS_CONJURE_ERROR_KEY = "instanceof com.palantir.conjure.ConjureError";
+export const IS_CONJURE_ERROR_KEY = "instanceof conjure-client#ConjureError";
 
 export class ConjureError<E> {
     // On the instance and enumerable (not a hidden prototype/symbol) so structured clone keeps it. See above.

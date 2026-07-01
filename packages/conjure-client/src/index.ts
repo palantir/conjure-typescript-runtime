@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-export * from "./errors";
+export * from "./errors/error";
 export * from "./fetchBridge";
 export { FetchBridge as DefaultHttpApiBridge } from "./fetchBridge";
 export * from "./httpApiBridge";

@@ -16,7 +16,7 @@
  */
 
 import * as fetchMock from "fetch-mock";
-import { ConjureError, ConjureErrorType } from "../../errors";
+import { ConjureError, ConjureErrorType } from "../../errors/error";
 import { IMPLEMENTATION_VERSION } from "../../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../../httpApiBridge";
 import { IUserAgent } from "../../userAgent";

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ConjureError, ConjureErrorType, isConjureError } from "../error";
+import { ConjureError, ConjureErrorType, IS_CONJURE_ERROR_KEY, isConjureError } from "../error";
 
 const body = {
     errorCode: "NOT_FOUND",
@@ -93,8 +93,6 @@ describe("ConjureError", () => {
 });
 
 describe("isConjureError", () => {
-    const IS_CONJURE_ERROR_KEY = "instanceof com.palantir.conjure.ConjureError";
-
     it("handles null errors", () => {
         expect(isConjureError(null)).toBe(false);
     });
