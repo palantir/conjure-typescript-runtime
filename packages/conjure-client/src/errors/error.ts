@@ -81,13 +81,7 @@ export function isConjureError(error: unknown): error is ConjureError<unknown> {
         return false;
     }
 
-    // Fast path: an error from this same copy of the library.
-    if (error instanceof ConjureError) {
-        return true;
-    }
-
-    // Matches errors from another copy of conjure-client, and — since the brand survives structured clone —
-    // ones that crossed a Worker boundary. Caveat: such a clone is data-only; its prototype (so `toString()`) is gone.
+    // Detect error objects in a way that is compatible across multiple copies of this library
     if (typeof error === "object" && IS_CONJURE_ERROR_KEY in error && error[IS_CONJURE_ERROR_KEY] === true) {
         return true;
     }
