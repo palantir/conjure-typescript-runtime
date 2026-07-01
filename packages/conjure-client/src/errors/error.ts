@@ -27,7 +27,20 @@ export enum ConjureErrorType {
     Status = "STATUS",
 }
 
+/**
+ * Brands every {@link ConjureError} so {@link isConjureError} recognises errors from a *different* copy of
+ * conjure-client (where `instanceof` fails), including ones that have crossed a Web Worker / `postMessage`
+ * boundary. It has to be an own, enumerable, string-keyed property because that is the only shape structured
+ * clone preserves — a symbol or prototype brand would be dropped by the clone. The price is visibility: it
+ * necessarily surfaces in `JSON.stringify`, `Object.keys`, spread and `for...in`. The `"instanceof "` prefix
+ * makes a branded object self-describing.
+ */
+const IS_CONJURE_ERROR_KEY = "instanceof com.palantir.conjure.ConjureError";
+
 export class ConjureError<E> {
+    // On the instance and enumerable (not a hidden prototype/symbol) so structured clone keeps it. See above.
+    public readonly [IS_CONJURE_ERROR_KEY]: true = true;
+
     public readonly type: ConjureErrorType;
     public readonly originalError?: any;
     public readonly status?: number;
@@ -68,10 +81,19 @@ export function isConjureError(error: unknown): error is ConjureError<unknown> {
         return false;
     }
 
+    // Fast path: an error from this same copy of the library.
     if (error instanceof ConjureError) {
         return true;
     }
 
+    // Matches errors from another copy of conjure-client, and — since the brand survives structured clone —
+    // ones that crossed a Worker boundary. Caveat: such a clone is data-only; its prototype (so `toString()`) is gone.
+    if (typeof error === "object" && IS_CONJURE_ERROR_KEY in error && error[IS_CONJURE_ERROR_KEY] === true) {
+        return true;
+    }
+
+    // Back-compat for an older conjure-client version on the page that predates the brand: match the class
+    // name. Brittle (minifiers mangle names) and removable in a major version.
     const errorPrototype = Object.getPrototypeOf(error);
 
     return (
