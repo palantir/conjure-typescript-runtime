@@ -11,7 +11,8 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "build": "npm-run-all clean lint prettier compile test",
+    "build": "npm-run-all clean lint prettier compile check-node-typings test",
+    "check-node-typings": "./scripts/check-node-typings.sh",
     "circle-publish": "./scripts/circle-publish-npm",
     "clean": "rm -rf lib/*",
     "precompile": "./scripts/generate-library-version.sh",
