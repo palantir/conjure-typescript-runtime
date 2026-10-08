@@ -15,6 +15,19 @@
  * limitations under the License.
  */
 
+/// <reference lib="dom" />
+// The public API of this module describes Fetch API values, so its emitted typings name
+// `Blob`, `Headers`, `Request`, `RequestInit` and `ReadableStream`. Without this
+// directive those names are unresolvable for consumers who do not have `lib.dom.d.ts`
+// configured, and `tsc` fails with TS2304 inside node_modules -- breaking the build of
+// any Node project that depends on this package, even transitively (see #79).
+//
+// The directive is emitted into the generated .d.ts, so consumers pick up the DOM lib
+// automatically and keep the exact types they have today. The trade-off is that
+// `lib.dom` globals become visible to Node consumers; declaring local stand-ins instead
+// would avoid that, but cannot preserve `ReadableStream`'s type parameter and would be
+// a breaking change for browser consumers. See the PR description for the comparison.
+
 import { ConjureError, ConjureErrorType, IQoSMetadata } from "../errors/error";
 import { IMPLEMENTATION_VERSION } from "../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
