@@ -337,6 +337,7 @@ export class FetchBridge implements IHttpApiBridge {
             contentType.includes("image/") ||
             contentType.includes("audio/") ||
             contentType.includes("video/") ||
+            contentType.includes("model/gltf-binary") ||
             contentType.includes("application/pdf") ||
             contentType.includes("application/dicom") ||
             contentType.includes("application/vnd.nitf") ||
