@@ -16,6 +16,7 @@
  */
 
 import { FetchFunction, IFetchResponse } from "./fetchBridge";
+import { getAbortReason } from "./requestDeadline";
 
 /**
  * The maximum value we accept in a Retry-After header.
@@ -23,6 +24,14 @@ import { FetchFunction, IFetchResponse } from "./fetchBridge";
  * the Retry-After header.
  */
 const MAX_RETRY_AFTER_MS = 60000;
+
+/**
+ * Conjure servers send `Qos-Retry-Hint: do-not-retry` alongside a 429/503 when retrying would only make an
+ * overload worse; clients should surface the failure instead. Matched case-insensitively, as in
+ * conjure-java-runtime-api's `QosReason.RetryHint`.
+ */
+const QOS_RETRY_HINT_HEADER = "Qos-Retry-Hint";
+const QOS_DO_NOT_RETRY = "do-not-retry";
 
 /**
  * A backoff strategy must return either the number of milliseconds to wait before retrying
@@ -36,7 +45,10 @@ const TOO_MANY_REQUESTS = 429;
 
 /**
  * Implements "exponential backoff with full jitter", suggesting a backoff duration chosen randomly from the interval
- * `[0, backoffSlotSize * 2^c)` for the c-th retry for a maximum of `maxNumRetries` retries.
+ * `[0, backoffSlotSize * 2^c)` for the c-th retry.
+ *
+ * Note that `maxNumRetries` bounds the total number of *attempts*, including the first one: with
+ * `exponentialBackoff(3, 100)` a request is sent at most 3 times (1 initial attempt + 2 retries).
  */
 export function exponentialBackoff(maxNumRetries: number, backoffSlotSizeMs: number): BackoffStrategy {
     return (attempt: number) => {
@@ -49,6 +61,13 @@ export function exponentialBackoff(maxNumRetries: number, backoffSlotSizeMs: num
     };
 }
 
+/**
+ * Wraps a `fetch` implementation to transparently retry `429 Too Many Requests` and `503 Service Unavailable`
+ * responses using the given {@link BackoffStrategy}, honouring the server's `Retry-After` header (in either its
+ * delta-seconds or HTTP-date form) and Conjure's `Qos-Retry-Hint: do-not-retry` header.
+ *
+ * Retries stop immediately if the request's `signal` is aborted.
+ */
 export class RetryingFetch {
     constructor(private delegate: FetchFunction, private backoffStrategy: BackoffStrategy) {}
 
@@ -68,12 +87,20 @@ export class RetryingFetch {
             return undefined;
         }
 
+        let retryAfterInMilliseconds: number;
         const retryAfterInSeconds = parseInt(retryAfterHeader, 10);
-        if (isNaN(retryAfterInSeconds)) {
-            return undefined;
+        if (!isNaN(retryAfterInSeconds)) {
+            retryAfterInMilliseconds = retryAfterInSeconds * 1000;
+        } else {
+            // RFC 9110 section 10.2.3 also allows an HTTP-date, e.g. "Wed, 21 Oct 2015 07:28:00 GMT".
+            const retryAt = Date.parse(retryAfterHeader);
+            if (isNaN(retryAt)) {
+                return undefined;
+            }
+            // A date in the past means "retry now".
+            retryAfterInMilliseconds = Math.max(0, retryAt - Date.now());
         }
 
-        const retryAfterInMilliseconds = retryAfterInSeconds * 1000;
         if (retryAfterInMilliseconds < 0 || retryAfterInMilliseconds > MAX_RETRY_AFTER_MS) {
             return undefined;
         }
@@ -83,6 +110,11 @@ export class RetryingFetch {
 
     private getRetryAfter(response: IFetchResponse, attempt: number): number | undefined {
         if (response.status === TOO_MANY_REQUESTS || response.status === SERVICE_UNAVAILABLE) {
+            const retryHint = response.headers.get(QOS_RETRY_HINT_HEADER);
+            if (retryHint != null && retryHint.trim().toLowerCase() === QOS_DO_NOT_RETRY) {
+                return undefined;
+            }
+
             const backoffStrategyBackoff = this.backoffStrategy(attempt);
             if (backoffStrategyBackoff === undefined) {
                 return undefined;
@@ -106,6 +138,12 @@ export class RetryingFetch {
         resolve: (value: IFetchResponse) => void,
         reject: (value: any) => void,
     ): Promise<void> {
+        const signal = init != null && init.signal != null ? init.signal : undefined;
+        if (signal !== undefined && signal.aborted) {
+            reject(getAbortReason(signal));
+            return;
+        }
+
         // fetch expects a nully context, so alias
         const fetchFunction = this.delegate;
         try {
@@ -116,15 +154,44 @@ export class RetryingFetch {
             }
 
             const retryAfter = this.getRetryAfter(response, attempt);
-            if (retryAfter !== undefined) {
-                // let's try again!
-                setTimeout(() => this.doAttempt(url, init, attempt + 1, resolve, reject), retryAfter);
-            } else {
+            if (retryAfter === undefined) {
                 // no more retries, return what we have
                 resolve(response);
+                return;
+            }
+
+            // We're discarding this response: release its body so the underlying connection can be reused
+            // instead of being held open until garbage collection.
+            discardBody(response);
+
+            // let's try again!
+            const retry = () => {
+                if (signal !== undefined) {
+                    signal.removeEventListener("abort", onAbort);
+                }
+                this.doAttempt(url, init, attempt + 1, resolve, reject);
+            };
+            const timer = setTimeout(retry, retryAfter);
+            const onAbort = () => {
+                clearTimeout(timer);
+                reject(getAbortReason(signal!));
+            };
+            if (signal !== undefined) {
+                signal.addEventListener("abort", onAbort);
             }
         } catch (e) {
             reject(e);
         }
+    }
+}
+
+function discardBody(response: IFetchResponse) {
+    try {
+        const body = response.body;
+        if (body != null && typeof body.cancel === "function" && !body.locked) {
+            body.cancel().catch(() => undefined);
+        }
+    } catch {
+        // Best effort only: some fetch polyfills expose non-standard bodies.
     }
 }
