@@ -20,6 +20,7 @@ import { IMPLEMENTATION_VERSION } from "../generated";
 import { IHttpApiBridge, IHttpEndpointOptions, MediaType } from "../httpApiBridge";
 import { IUserAgent, UserAgent } from "../userAgent";
 import { blobToReadableStream } from "./blobReadableStreamAdapter";
+import { RequestDeadline } from "./requestDeadline";
 
 const QOS_RETRY_HINT_HEADER = "QoS-Retry-Hint";
 const QOS_DUE_TO_HEADER = "QoS-Due-To";
@@ -50,6 +51,14 @@ export interface IFetchBridgeParams {
     userAgent: IUserAgent | ReadonlyArray<IUserAgent | Supplier<IUserAgent | IUserAgent[]>>;
     token?: string | Supplier<string> | Supplier<Promise<string>>;
     fetch?: FetchFunction;
+    /**
+     * Optional upper bound, in milliseconds, on how long a single call may take — from the moment it is made until
+     * its response body has been read (for streamed binary responses: until the stream is handed back). When it
+     * elapses the request is aborted and the call rejects with a `ConjureError` of type `NETWORK` whose
+     * `originalError` has name `"TimeoutError"`. Applies across retries when combined with `RetryingFetch`.
+     * Unset by default (no timeout).
+     */
+    requestTimeoutMs?: number;
 }
 
 const CONJURE_USER_AGENT = {
@@ -64,11 +73,24 @@ export class FetchBridge implements IHttpApiBridge {
     private readonly getToken: Supplier<string | Promise<string> | undefined>;
     private readonly fetch: FetchFunction | undefined;
     private readonly userAgentSuppliers: Array<Supplier<IUserAgent | IUserAgent[]>>;
+    private readonly requestTimeoutMs: number | undefined;
 
     constructor(params: IFetchBridgeParams) {
         this.getBaseUrl = typeof params.baseUrl === "function" ? params.baseUrl : () => params.baseUrl as string;
         this.getToken = typeof params.token === "function" ? params.token : () => params.token as string | undefined;
         this.fetch = params.fetch;
+
+        if (
+            params.requestTimeoutMs !== undefined &&
+            !(
+                typeof params.requestTimeoutMs === "number" &&
+                params.requestTimeoutMs > 0 &&
+                isFinite(params.requestTimeoutMs)
+            )
+        ) {
+            throw new Error("requestTimeoutMs must be a positive, finite number of milliseconds");
+        }
+        this.requestTimeoutMs = params.requestTimeoutMs;
 
         const userAgents = Array.isArray(params.userAgent) ? params.userAgent : [params.userAgent];
         if (userAgents.length === 0) {
@@ -115,10 +137,11 @@ export class FetchBridge implements IHttpApiBridge {
     }
 
     public async callEndpoint<T>(params: IHttpEndpointOptions): Promise<T> {
-        const fetchPromise = this.makeFetchCall(params);
+        const deadline = new RequestDeadline(this.requestTimeoutMs, params.signal);
 
         try {
-            const response = await fetchPromise;
+            deadline.throwIfFailed();
+            const response = await deadline.race(this.makeFetchCall(params, deadline.signal));
             if (response.status === 204) {
                 // Users of this HTTP bridge are responsible for declaring whether their endpoint might return a 204
                 // by including `| undefined` in callEndpoint's generic type param. We choose this over declaring the
@@ -147,8 +170,11 @@ export class FetchBridge implements IHttpApiBridge {
 
             let body;
             try {
-                body = await bodyPromise;
+                body = await deadline.race(bodyPromise);
             } catch (error) {
+                if (deadline.timedOut || deadline.aborted) {
+                    throw error;
+                }
                 throw new ConjureError(
                     ConjureErrorType.Parse,
                     error,
@@ -170,17 +196,28 @@ export class FetchBridge implements IHttpApiBridge {
 
             return body;
         } catch (error) {
-            if (error instanceof ConjureError) {
+            if (deadline.timedOut) {
+                // A request that never completed in time is a transport-level failure, like a dropped connection.
+                throw new ConjureError(ConjureErrorType.Network, deadline.error);
+            } else if (deadline.aborted) {
+                // Cancelled by the caller; `originalError` is the signal's abort reason (an `AbortError` by default).
+                throw new ConjureError(ConjureErrorType.Other, deadline.error);
+            } else if (error instanceof ConjureError) {
                 throw error;
             } else if (error instanceof TypeError) {
                 throw new ConjureError(ConjureErrorType.Network, error);
             } else {
                 throw new ConjureError(ConjureErrorType.Other, error);
             }
+        } finally {
+            deadline.dispose();
         }
     }
 
-    private async makeFetchCall(params: IHttpEndpointOptions): Promise<IFetchResponse> {
+    private async makeFetchCall(
+        params: IHttpEndpointOptions,
+        signal: AbortSignal | undefined,
+    ): Promise<IFetchResponse> {
         const query = this.buildQueryString(params.queryArguments);
         const url = `${this.getBaseUrl()}/${this.buildPath(params)}${query.length > 0 ? `?${query}` : ""}`;
         const { data, headers = {}, method, requestMediaType, responseMediaType } = params;
@@ -202,8 +239,15 @@ export class FetchBridge implements IHttpApiBridge {
             method,
         };
 
+        if (signal !== undefined) {
+            // Only set when a timeout or caller signal is in play, so default requests are unchanged.
+            fetchRequestInit.signal = signal;
+        }
+
         const token = await this.getToken();
-        if (token !== undefined) {
+        // Never send `Bearer null`/`Bearer undefined`/`Bearer ` when a token supplier has nothing to offer
+        // (e.g. a signed-out user); omit the header instead.
+        if (token != null && token !== "") {
             fetchRequestInit.headers = { ...fetchRequestInit.headers, Authorization: `Bearer ${token}` };
         }
 
