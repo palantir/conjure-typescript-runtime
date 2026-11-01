@@ -23,11 +23,19 @@ export function blobToReadableStream(blobPromise: Promise<Blob>): Promise<Readab
             const reader = new FileReader();
             reader.onload = () => {
                 controller.enqueue(new Uint8Array(reader.result as ArrayBuffer));
+                // The whole blob arrives in a single chunk, so the stream is complete. Without this, consumers
+                // reading to the end (e.g. `new Response(stream).blob()`) would wait forever for `done: true`.
+                controller.close();
             };
             reader.onerror = () => {
                 controller.error(reader.error);
             };
-            blobPromise.then(blob => reader.readAsArrayBuffer(blob));
+            blobPromise.then(
+                blob => reader.readAsArrayBuffer(blob),
+                // Surface body-read failures on the stream instead of leaving it pending forever
+                // (and leaking an unhandled promise rejection).
+                error => controller.error(error),
+            );
         },
     };
     if (process.env.MODERN) {

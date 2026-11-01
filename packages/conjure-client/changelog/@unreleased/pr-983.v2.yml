@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: 'Add `requestTimeoutMs` to `FetchBridge` and a per-call `signal` to `IHttpEndpointOptions`. `RetryingFetch` now honours `Qos-Retry-Hint: do-not-retry` and HTTP-date `Retry-After`, and it stops when aborted. Fix binary streams that never closed on the blob fallback path.'
+  links:
+  - https://github.com/palantir/conjure-typescript-runtime/pull/983

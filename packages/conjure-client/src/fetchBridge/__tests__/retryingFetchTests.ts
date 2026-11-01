@@ -122,7 +122,124 @@ describe("RetryingFetch", () => {
         // restore
         window.setTimeout = originalSetTimeout;
     });
+
+    for (const hint of ["do-not-retry", "Do-Not-Retry"]) {
+        it(`does not retry when the server sends Qos-Retry-Hint: ${hint}`, async () => {
+            const response = createFetchResponse(undefined, 503);
+            response.headers.append("Qos-Retry-Hint", hint);
+            const delegateFetch = jest.fn((_, __) => Promise.resolve(response));
+
+            const result = await new RetryingFetch(delegateFetch, backoff).fetch(baseUrl, createFetchRequest("GET"));
+
+            expect(result).toBe(response);
+            expect(delegateFetch.mock.calls.length).toBe(1);
+        });
+    }
+
+    it("still retries on other Qos-Retry-Hint values", async () => {
+        const throttled = createFetchResponse(undefined, 429);
+        throttled.headers.append("Qos-Retry-Hint", "some-future-hint");
+        const final = createFetchResponse(undefined, 200);
+        const delegateFetch = jest.fn().mockResolvedValueOnce(throttled).mockResolvedValueOnce(final);
+
+        const result = await new RetryingFetch(delegateFetch, () => 1).fetch(baseUrl, createFetchRequest("GET"));
+
+        expect(result).toBe(final);
+        expect(delegateFetch.mock.calls.length).toBe(2);
+    });
+
+    it("honours Retry-After headers in HTTP-date form", async () => {
+        const response = createFetchResponse(undefined, 503);
+        response.headers.append("Retry-After", new Date(Date.now() + 2000).toUTCString());
+        const delays = await captureRetryDelays(response);
+
+        // HTTP-dates have one-second resolution, so allow for truncation.
+        expect(delays[0]).toBeGreaterThan(900);
+        expect(delays[0]).toBeLessThanOrEqual(2000);
+    });
+
+    it("retries immediately for a Retry-After date in the past", async () => {
+        const response = createFetchResponse(undefined, 503);
+        response.headers.append("Retry-After", new Date(Date.now() - 60000).toUTCString());
+        const delays = await captureRetryDelays(response);
+
+        expect(delays[0]).toBe(0);
+    });
+
+    it("ignores Retry-After dates beyond the maximum", async () => {
+        const response = createFetchResponse(undefined, 503);
+        response.headers.append("Retry-After", new Date(Date.now() + 10 * 60000).toUTCString());
+        const delays = await captureRetryDelays(response, () => 7);
+
+        expect(delays[0]).toBe(7);
+    });
+
+    it("releases the body of responses it retries past", async () => {
+        const discarded = createFetchResponse(undefined, 503);
+        const cancel = jest.spyOn(discarded.body!, "cancel");
+        const final = createFetchResponse(undefined, 200);
+        const delegateFetch = jest.fn().mockResolvedValueOnce(discarded).mockResolvedValueOnce(final);
+
+        const result = await new RetryingFetch(delegateFetch, () => 1).fetch(baseUrl, createFetchRequest("GET"));
+
+        expect(result).toBe(final);
+        expect(cancel).toHaveBeenCalledTimes(1);
+    });
+
+    it("stops retrying and rejects when the request's signal is aborted during backoff", async () => {
+        const delegateFetch = jest.fn((_, __) => Promise.resolve(createFetchResponse(undefined, 503)));
+        const controller = new AbortController();
+
+        const promise = new RetryingFetch(delegateFetch, () => 50).fetch(baseUrl, {
+            ...createFetchRequest("GET"),
+            signal: controller.signal,
+        });
+        await new Promise(resolve => setTimeout(resolve, 10));
+        controller.abort();
+
+        await expect(promise).rejects.toMatchObject({ name: "AbortError" });
+        await new Promise(resolve => setTimeout(resolve, 100));
+        expect(delegateFetch.mock.calls.length).toBe(1);
+    });
+
+    it("does not call the delegate when the signal is already aborted", async () => {
+        const delegateFetch = jest.fn();
+        const controller = new AbortController();
+        controller.abort();
+
+        const promise = new RetryingFetch(delegateFetch, backoff).fetch(baseUrl, {
+            ...createFetchRequest("GET"),
+            signal: controller.signal,
+        });
+
+        await expect(promise).rejects.toMatchObject({ name: "AbortError" });
+        expect(delegateFetch).not.toHaveBeenCalled();
+    });
 });
+
+/** Runs a request whose first response is `first` and whose retry succeeds, recording each backoff delay. */
+async function captureRetryDelays(first: IFetchResponse, strategy = backoffForever): Promise<number[]> {
+    const delegateFetch = jest
+        .fn()
+        .mockResolvedValueOnce(first)
+        .mockResolvedValueOnce(createFetchResponse(undefined, 200));
+    const delays: number[] = [];
+    const originalSetTimeout = window.setTimeout;
+    window.setTimeout = ((callback: () => void, timeout: number) => {
+        delays.push(timeout);
+        return originalSetTimeout(callback, 0);
+    }) as any;
+    try {
+        await new RetryingFetch(delegateFetch, strategy).fetch(baseUrl, createFetchRequest("GET"));
+    } finally {
+        window.setTimeout = originalSetTimeout;
+    }
+    return delays;
+}
+
+function backoffForever() {
+    return 5;
+}
 
 function createFetchRequest(method: string, data?: any, contentType = "application/json", headers = {}): RequestInit {
     const request: RequestInit = {

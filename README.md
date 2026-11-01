@@ -42,6 +42,55 @@ service.getSomeResult()
     });
 ```
 
+## Timeouts and cancellation
+
+Set `requestTimeoutMs` to bound how long any call may take. The timer covers the whole call, including retries
+and reading the response body (for streamed binary responses, until the stream is handed back to you). A call that
+runs out of time is aborted and rejects with a `ConjureError` of type `NETWORK`, whose `originalError.name` is
+`"TimeoutError"`.
+
+```typescript
+const bridge = new DefaultHttpApiBridge({
+    baseUrl: "https://some.base.url.com",
+    userAgent: { productName: "yourProductName", productVersion: "1.0.0" },
+    requestTimeoutMs: 30_000,
+});
+```
+
+To cancel an individual call, pass an `AbortSignal` to `callEndpoint`. When the signal fires, the request is
+aborted, any pending retries stop, and the call rejects with a `ConjureError` of type `OTHER`. Its
+`originalError` is the signal's abort reason, which is an `AbortError` by default.
+
+```typescript
+const controller = new AbortController();
+const result = bridge.callEndpoint({
+    endpointPath: "/search",
+    method: "POST",
+    data: { query },
+    pathArguments: [],
+    queryArguments: {},
+    signal: controller.signal,
+});
+// later, e.g. when the user types a newer query or a component unmounts:
+controller.abort();
+```
+
+## Retries
+
+Wrap `fetch` in a `RetryingFetch` to retry `429 Too Many Requests` and `503 Service Unavailable` responses with
+exponential backoff and full jitter:
+
+```typescript
+import { DefaultHttpApiBridge, exponentialBackoff, RetryingFetch } from "conjure-client";
+
+const retryingFetch = new RetryingFetch(fetch, exponentialBackoff(4 /* max attempts */, 250 /* slot size, ms */));
+const bridge = new DefaultHttpApiBridge({ baseUrl, userAgent, fetch: retryingFetch.fetch });
+```
+
+`RetryingFetch` follows the server's lead. It waits for the time given in `Retry-After`, in either delta-seconds or
+HTTP-date form, up to 60s. It does not retry when the server sends Conjure's `Qos-Retry-Hint: do-not-retry` header.
+It releases the body of every response it discards, and it stops as soon as the request's signal is aborted.
+
 
 ## Contributing
 

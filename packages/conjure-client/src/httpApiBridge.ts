@@ -48,6 +48,13 @@ export interface IHttpEndpointOptions {
 
     /** return binary response as web stream */
     binaryAsStream?: boolean;
+
+    /**
+     * Optional signal for cancelling the request (e.g. when a React component unmounts or a newer search
+     * supersedes an older one). Aborting rejects the call with a `ConjureError` of type `OTHER` whose
+     * `originalError` is the signal's abort reason, stops any pending retries, and frees the connection.
+     */
+    signal?: AbortSignal;
 }
 
 export enum MediaType {
